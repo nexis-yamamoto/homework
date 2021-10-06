@@ -17,9 +17,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Laravel8以降、RouteServiceProvider.phpでnamespaceを解決してくれないので
+// フルパスでControllerを記述する
+
 // artisan http://192.168.253.88:8000/hello
-// apache http://192.168.253.88/admin/hello
-Route::get('/hello', function() {
+Route::get('hello', 'App\Http\Controllers\HelloController@index');
+// artisan http://192.168.253.88:8000/hello/view/yamamoto/2
+Route::get('hello/view/{name?}/{no?}', 'App\Http\Controllers\HelloController@view');
+Route::get('hello/some', 'App\Http\Controllers\HelloController@some');
+Route::get('hello/other', 'App\Http\Controllers\HelloController@other');
+
+// シングルアクションコントローラなら@action名を省略
+// artisan http://192.168.253.88:8000/single
+Route::get('single/{id?}', 'App\Http\Controllers\SingleActionController');
+
+// artisan http://192.168.253.88:8000/hi
+// apache http://192.168.253.88/admin/hi
+Route::get('/hi', function() {
     return '<html><body><h1>hello</h1></body></html>';
 });
 
