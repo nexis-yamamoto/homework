@@ -32,6 +32,10 @@
     <ul>
         @each('components.name_mail_item', $persons, 'item')
     </ul>
+
+    <p>Controller value; 'message' = {{$message}}</p>
+    <p>ViewComposer value; 'view_message1' = {{$view_message1}}</p>
+    <p>ViewComposer value; 'view_message2' = {{$view_message2}}</p>
 @endsection
 
 @section('footer')

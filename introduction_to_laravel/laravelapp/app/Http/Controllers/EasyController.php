@@ -13,7 +13,8 @@ class EasyController extends Controller
                 ['name' => '山田太郎', 'mail' => 'yamada@example.com'],
                 ['name' => '田中はなこ', 'mail' => 'tanaka@example.com'],
                 ['name' => '鈴木さちこ', 'mail' => 'suzuki@example.com']
-            ]
+            ],
+            'message' => 'message form controller',
         ];
         return view('easy.simple', $data);
     }
