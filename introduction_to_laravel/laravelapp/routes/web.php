@@ -31,6 +31,8 @@ Route::get('hello/other', 'App\Http\Controllers\HelloController@other');
 // artisan http://192.168.253.88:8000/single
 Route::get('single/{id?}', 'App\Http\Controllers\SingleActionController');
 
+
+
 // artisan http://192.168.253.88:8000/practice/2
 // phpテンプレートの使用＆routeパラメータ渡し
 Route::get('practice/{id}', 'App\Http\Controllers\PracticeController@index');
@@ -38,6 +40,9 @@ Route::get('practice/{id}', 'App\Http\Controllers\PracticeController@index');
 // phpテンプレート使用＆クエリ文字列を使う
 Route::get('query', 'App\Http\Controllers\PracticeController@query');
 
+// http://192.168.253.88:8000/blade/form
+Route::get('blade/form', 'App\Http\Controllers\PracticeController@blade');
+Route::post('blade/form', 'App\Http\Controllers\PracticeController@post');
 
 
 
