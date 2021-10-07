@@ -44,6 +44,10 @@ Route::get('query', 'App\Http\Controllers\PracticeController@query');
 Route::get('blade/form', 'App\Http\Controllers\PracticeController@blade');
 Route::post('blade/form', 'App\Http\Controllers\PracticeController@post');
 
+// http://192.168.253.88:8000/blade/loop
+Route::get('blade/loop', 'App\Http\Controllers\PracticeController@loop');
+
+
 
 
 // artisan http://192.168.253.88:8000/hi

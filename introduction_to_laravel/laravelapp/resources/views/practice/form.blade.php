@@ -10,7 +10,20 @@
 <body>
     <h1>Blade/Index</h1>
     <p>blade-templateでPOSTする</p>
-    <p>メッセージ: <?php echo $msg; ?></p>
+    <p>
+        メッセージ:
+        @isset ($msg)
+            @if ($msg === 'こんにちは')
+                <span>こんにちは！こんにちは！</span>
+            @else
+                <span>a{{$msg}}</span>
+            @endif
+        @else
+            <span>メッセージを入力してください<span>
+        @endisset
+    </p>
+
+
     <p><?php echo date('Y年n月j日'); ?></p>
     <form method="POST" action="/blade/form">
         @csrf

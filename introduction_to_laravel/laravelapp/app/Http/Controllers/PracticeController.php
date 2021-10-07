@@ -28,12 +28,9 @@ class PracticeController extends Controller
     // Blade Template
     public function blade()
     {
-        $data = [
-            'msg' => 'これはBlade Templateのサンプルです'
-        ];
         // resources/viewsの下の practice/form.phpを指す
         // practice/form.blade.phpがあるときはこちらが優先
-        return view('practice.form', $data);
+        return view('practice.form');
     }
     public function post(Request $request)
     {
@@ -42,5 +39,16 @@ class PracticeController extends Controller
             'msg' => $msg
         ];
         return view('practice.form', $data);
+    }
+
+    //Blade Loop Directive
+    public function loop()
+    {
+        $list = ['one', 'two', 'three', 'four', 'five'];
+        $data = [
+            'list' => $list,
+            'emptylist' => []
+        ];
+        return view('practice.loop', $data);
     }
 }
