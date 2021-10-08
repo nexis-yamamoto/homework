@@ -60,6 +60,9 @@ Route::post('validation/custom', 'App\Http\Controllers\ValidationController@cust
 Route::get('validation/original', 'App\Http\Controllers\ValidationController@original_form');
 Route::post('validation/original', 'App\Http\Controllers\ValidationController@original');
 
+Route::get('cookie', 'App\Http\Controllers\EasyController@cookie');
+Route::post('cookie', 'App\Http\Controllers\EasyController@cookie_post');
+
 ///
 /// 以下直に返す例
 ///
