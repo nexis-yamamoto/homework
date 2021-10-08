@@ -46,8 +46,10 @@ Route::post('blade/form', 'App\Http\Controllers\PracticeController@post');
 // http://192.168.253.88:8000/blade/loop
 Route::get('blade/loop', 'App\Http\Controllers\PracticeController@loop');
 
-//
-Route::get('easy', 'App\Http\Controllers\EasyController@index');
+// http://192.168.253.88:8000/easy
+Route::get('easy', 'App\Http\Controllers\EasyController@index')
+    ->middleware('simple'); // Kernel.phpのrouteMiddlewareに登録して名称でつかうか
+//    ->middleware(\App\Http\Middleware\SimpleMiddleware::class); // フルパスでつかうかのどちらか
 
 
 // artisan http://192.168.253.88:8000/hi

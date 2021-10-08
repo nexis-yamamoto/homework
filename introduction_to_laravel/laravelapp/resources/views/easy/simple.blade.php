@@ -29,13 +29,22 @@
 
     @include('components.message', ['msg_title' => 'OK', 'msg_content' => 'includeしたらサブビュー、こっちはslotつかえなくて値渡しだけ'] )
 
+    <h3>Controllerで追加したリスト</h3>
     <ul>
         @each('components.name_mail_item', $persons, 'item')
+    </ul>
+
+    <h3>middlewareで追加したリスト</h3>
+    <ul>
+        @each('components.name_mail_item', $middleware_persons, 'item')
     </ul>
 
     <p>Controller value; 'message' = {{$message}}</p>
     <p>ViewComposer value; 'view_message1' = {{$view_message1}}</p>
     <p>ViewComposer value; 'view_message2' = {{$view_message2}}</p>
+
+
+    <p><middleware>google.com</middleware>へのリンクにmiddlewareで置き換え</p>
 @endsection
 
 @section('footer')
