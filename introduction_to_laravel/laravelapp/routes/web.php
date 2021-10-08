@@ -54,7 +54,11 @@ Route::get('easy', 'App\Http\Controllers\EasyController@index')
 Route::get('validation', 'App\Http\Controllers\ValidationController@index');
 Route::post('validation', 'App\Http\Controllers\ValidationController@post');
 
+Route::get('validation/custom', 'App\Http\Controllers\ValidationController@form');
+Route::post('validation/custom', 'App\Http\Controllers\ValidationController@custom');
 
+Route::get('validation/original', 'App\Http\Controllers\ValidationController@original_form');
+Route::post('validation/original', 'App\Http\Controllers\ValidationController@original');
 
 ///
 /// 以下直に返す例

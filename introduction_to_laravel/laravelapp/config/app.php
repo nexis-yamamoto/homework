@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         App\Providers\ViewComposeProvider::class,
+        App\Providers\UserValidationServiceProvider::class,
     ],
 
     /*
