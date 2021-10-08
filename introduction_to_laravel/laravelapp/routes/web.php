@@ -51,6 +51,14 @@ Route::get('easy', 'App\Http\Controllers\EasyController@index')
     ->middleware('simple'); // Kernel.phpのrouteMiddlewareに登録して名称でつかうか
 //    ->middleware(\App\Http\Middleware\SimpleMiddleware::class); // フルパスでつかうかのどちらか
 
+Route::get('validation', 'App\Http\Controllers\ValidationController@index');
+Route::post('validation', 'App\Http\Controllers\ValidationController@post');
+
+
+
+///
+/// 以下直に返す例
+///
 
 // artisan http://192.168.253.88:8000/hi
 // apache http://192.168.253.88/admin/hi
