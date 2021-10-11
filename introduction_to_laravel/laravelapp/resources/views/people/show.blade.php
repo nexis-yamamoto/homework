@@ -10,15 +10,15 @@
 @section('content')
     @if ($items != null)
     <table>
-        <tr><th>Name</th><th>Mail</th><th>Age</th><th>Action</th></tr>
+        <tr><th>ID</th><th>Name</th><th>Mail</th><th>Age</th></tr>
         @csrf
         @foreach ($items as $item)
             <tr>
                 <td>{{$item->id}}</td>
-            <td>{{$item->name}}</td>
-            <td>{{$item->mail}}</td>
-            <td>{{$item->age}}</td>
-</tr>
+                <td>{{$item->name}}</td>
+                <td>{{$item->mail}}</td>
+                <td>{{$item->age}}</td>
+            </tr>
         @endforeach
     </table>
     @endif
