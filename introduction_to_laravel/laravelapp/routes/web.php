@@ -63,6 +63,18 @@ Route::post('validation/original', 'App\Http\Controllers\ValidationController@or
 Route::get('cookie', 'App\Http\Controllers\EasyController@cookie');
 Route::post('cookie', 'App\Http\Controllers\EasyController@cookie_post');
 
+
+Route::get('people', 'App\Http\Controllers\PeopleController@index');
+Route::get('people/add', 'App\Http\Controllers\PeopleController@add');
+Route::post('people/add', 'App\Http\Controllers\PeopleController@create');
+
+Route::get('people/edit/{id}', 'App\Http\Controllers\PeopleController@edit');
+Route::post('people/edit', 'App\Http\Controllers\PeopleController@update');
+
+Route::get('people/delete/{id}', 'App\Http\Controllers\PeopleController@delete');
+Route::post('people/delete', 'App\Http\Controllers\PeopleController@remove');
+
+
 ///
 /// 以下直に返す例
 ///
