@@ -77,6 +77,12 @@ Route::get('people/delete/{id}', 'App\Http\Controllers\PeopleController@delete')
 Route::post('people/delete', 'App\Http\Controllers\PeopleController@remove');
 
 
+Route::get('person', 'App\Http\Controllers\PersonController@index');
+Route::get('person/show/{id}', 'App\Http\Controllers\PersonController@show');
+
+Route::get('person/find/', 'App\Http\Controllers\PersonController@find');
+Route::post('person/find/', 'App\Http\Controllers\PersonController@search');
+
 ///
 /// 以下直に返す例
 ///

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/*
+    DBクラスやクエリビルダでpeopleテーブルのCRUDをする
+ */
 class PeopleController extends Controller
 {
     public function index(Request $request) {
@@ -67,7 +70,7 @@ class PeopleController extends Controller
         //DB::update('update people set name=:name, mail=:mail, age=:age where id=:id', $param);
         return redirect('/people');
     }
-
+ 
     public function delete($id) {
         $param = ['id'=>$id];
         $item = DB::select('select * from people where id=:id', $param);

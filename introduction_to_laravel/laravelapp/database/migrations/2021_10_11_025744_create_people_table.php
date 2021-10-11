@@ -18,6 +18,7 @@ class CreatePeopleTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('mail');
+                //->nullable()->change();
             $table->integer('age');
             // created_atとupdated_atの生成
             $table->timestamps();
