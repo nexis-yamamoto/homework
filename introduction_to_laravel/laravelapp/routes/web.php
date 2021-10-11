@@ -65,6 +65,8 @@ Route::post('cookie', 'App\Http\Controllers\EasyController@cookie_post');
 
 
 Route::get('people', 'App\Http\Controllers\PeopleController@index');
+Route::post('people/show', 'App\Http\Controllers\PeopleController@show');
+
 Route::get('people/add', 'App\Http\Controllers\PeopleController@add');
 Route::post('people/add', 'App\Http\Controllers\PeopleController@create');
 
