@@ -12,15 +12,23 @@ class Person extends Model
 {
     use HasFactory;
 
+    protected $guarded = array('id');
+
+    public static $rules = array(
+        'name' => 'required',
+        'mail' => 'email',
+        'age' => 'numeric|min:0|max:150',
+    );
+
     protected static function boot()
     {
         parent::boot();
 
         // モデル利用時いつでも掛ける絞り込み条件GlobalScope
         // 無名関数版
-        static::addGlobalScope('age', function(Builder $builder) {
-            $builder->where('age', '>', 30);
-        });
+        //static::addGlobalScope('age', function(Builder $builder) {
+        //    $builder->where('age', '>', 30);
+        //});
         // 別クラス版
         //static::addGlobalScope(new PersonScope);
     }
