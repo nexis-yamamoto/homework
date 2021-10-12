@@ -20,6 +20,11 @@ class Person extends Model
         'age' => 'numeric|min:0|max:150',
     );
 
+    public function boards()
+    {
+        return $this->hasMany('App\Models\Board');
+    }
+
     protected static function boot()
     {
         parent::boot();

@@ -10,8 +10,15 @@ class PersonController extends Controller
 {
     public function index(Request $resuest)
     {
-        $items = Person::all();
-        return view('person.index', ['items' => $items]);
+        //$items = Person::all();
+        // リレーションのレコード有無によるしぼりこみ
+        $hasPosts = Person::has('boards')->get();
+        $noPosts = Person::doesntHave('boards')->get();
+        $data = [
+            'hasItems' => $hasPosts,
+            'noItems' => $noPosts
+        ];
+        return view('person.index', $data);
     }
 
     public function show($id = 0)
