@@ -25,8 +25,14 @@ class PersonController extends Controller
     }
     public function search(Request $request)
     {
-        $person = Person::find($request->input);
-        $data = ['input' => $request->input, 'items' => [$person]];
+        #$person = Person::all(); # 全件
+        #$person = Person::find($request->input)->get(); # idで
+        $person = Person::where('name', 'like', '%'.$request->input.'%')->get(); # nameで
+        $person = Person::nameEqual($request->input)->get(); # local scope
+        $person = Person::ageGreaterThan(20)->ageLessThan(40)->get(); # local scope連鎖
+        $data = ['input' => $request->input, 'items' => $person];
         return view('person.find', $data);
     }
+
+
 }
