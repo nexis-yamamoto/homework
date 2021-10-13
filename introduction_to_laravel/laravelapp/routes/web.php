@@ -78,6 +78,8 @@ Route::post('people/delete', 'App\Http\Controllers\PeopleController@remove');
 
 
 Route::get('person', 'App\Http\Controllers\PersonController@index');
+// ページねーと版
+Route::get('person/paginate_index', 'App\Http\Controllers\PersonController@paginate_index');
 Route::get('person/show/{id}', 'App\Http\Controllers\PersonController@show');
 
 Route::get('person/find', 'App\Http\Controllers\PersonController@find');

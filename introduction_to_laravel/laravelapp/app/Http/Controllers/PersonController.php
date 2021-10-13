@@ -21,6 +21,20 @@ class PersonController extends Controller
         return view('person.index', $data);
     }
 
+    public function paginate_index(Request $request)
+    {
+        $sort = $request->sort;
+        //$items = Person::orderBy($sort, 'asc')->simplePaginate(5);
+        $items = Person::orderBy($sort, 'asc')->paginate(5);
+        $data = [
+            'hasItems' => array(),
+            'noItems' => array(),
+            'items' => $items,
+            'sort' => $sort,
+        ];
+        return view('person.index', $data);
+    }
+
     public function show($id = 0)
     {
         $person = Person::find($id);

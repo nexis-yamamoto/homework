@@ -23,6 +23,7 @@
             </tr>
         @endforeach
     </table>
+    {{ $items->links() }}
     <p><a href="/people/add">new</a><p>
 
     <form action="/people/show" method="post">

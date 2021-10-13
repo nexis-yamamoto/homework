@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class PeopleController extends Controller
 {
     public function index(Request $request) {
-        $items = DB::table('people')->get();
+        $items = DB::table('people')->orderBy('age', 'asc')->simplePaginate(5);
         return view('people.index', ['items' => $items]);
     }
 
