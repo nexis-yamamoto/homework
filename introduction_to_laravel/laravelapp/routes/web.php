@@ -91,9 +91,14 @@ Route::get('person/edit', 'App\Http\Controllers\PersonController@edit');
 Route::post('person/edit', 'App\Http\Controllers\PersonController@update');
 Route::get('person/delete', 'App\Http\Controllers\PersonController@delete');
 Route::post('person/delete', 'App\Http\Controllers\PersonController@remove');
-// セッション
-Route::get('person/session', 'App\Http\Controllers\PersonController@session');
+// セッション(ミドルウェア認証)
+Route::get('person/session', 'App\Http\Controllers\PersonController@session')
+    ->middleware('auth');
 Route::post('person/session', 'App\Http\Controllers\PersonController@session_write');
+
+// ユーザ認証自作
+Route::get('person/auth', 'App\Http\Controllers\PersonController@auth');
+Route::post('person/auth', 'App\Http\Controllers\PersonController@postAuth');
 
 
 Route::get('board', 'App\Http\Controllers\BoardController@index');
@@ -188,3 +193,6 @@ EOF;
     return $html;
 });
     
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

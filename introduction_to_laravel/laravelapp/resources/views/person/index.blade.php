@@ -8,6 +8,12 @@
 @endsection
 
 @section('content')
+    @if (Auth::check())
+        <p>User: {{$user->name . '(' . $user->email . ')'}}</p>
+    @else
+        <p>ログインしていませｎ <a href="/login">ログイン</a></p>
+    @endif
+
 
     <p>投稿ありユーザ</p>
     <table>
@@ -88,7 +94,10 @@
     https://readouble.com/laravel/8.x/ja/pagination.html
     // ページ候補の表示はbootstrapを有効にしないとでなくなった
     https://biz.addisteria.com/laravel8_pagination/
-    {{ $items->appends(['sort' => $sort])->links() }}
+
+    @if (!empty($items))
+        {{ $items->appends(['sort' => $sort])->links() }}
+    @endif
 
     <p><a href="/person/add">new</a><p>
     <p><a href="/board">board</a><p>

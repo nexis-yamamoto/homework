@@ -5,18 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class PersonController extends Controller
 {
     public function index(Request $resuest)
     {
+        $user = Auth::user();
         //$items = Person::all();
         // リレーションのレコード有無によるしぼりこみ
         $hasPosts = Person::has('boards')->get();
         $noPosts = Person::doesntHave('boards')->get();
         $data = [
             'hasItems' => $hasPosts,
-            'noItems' => $noPosts
+            'noItems' => $noPosts,
+            'items' => array(),
+            'user' => $user,
         ];
         return view('person.index', $data);
     }
@@ -112,6 +116,25 @@ class PersonController extends Controller
         $msg = $request->input;
         $request->session()->put('msg', $msg);
         return redirect('person/session');
+    }
+
+    public function auth(Request $request)
+    {
+        $param = ['message' => 'ログインしてください'];
+        return view('person.auth', $param);
+    }
+
+    public function postAuth(Request $request)
+    {
+        $email = $request->email;
+        $password = $request->password;
+        if (Auth::attempt(['email' => $email, 'password' => $password]))
+        {
+            $msg = 'ログインしました:' . Auth::user()->name;
+        } else {
+            $msg = 'ログイン失敗しました:';
+        }
+        return view('person.auth', ['message' => $msg]);
     }
 
 }
