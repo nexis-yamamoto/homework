@@ -88,4 +88,16 @@ class PersonController extends Controller
         return redirect('/person');
     }
 
+    public function session(Request $request)
+    {
+        $sessionMsg = $request->session()->get('msg');
+        return view('person.session', ['sessionString' => $sessionMsg]);
+    }
+    public function session_write(Request $request)
+    {
+        $msg = $request->input;
+        $request->session()->put('msg', $msg);
+        return redirect('person/session');
+    }
+
 }

@@ -89,6 +89,10 @@ Route::get('person/edit', 'App\Http\Controllers\PersonController@edit');
 Route::post('person/edit', 'App\Http\Controllers\PersonController@update');
 Route::get('person/delete', 'App\Http\Controllers\PersonController@delete');
 Route::post('person/delete', 'App\Http\Controllers\PersonController@remove');
+// セッション
+Route::get('person/session', 'App\Http\Controllers\PersonController@session');
+Route::post('person/session', 'App\Http\Controllers\PersonController@session_write');
+
 
 Route::get('board', 'App\Http\Controllers\BoardController@index');
 Route::get('board/add', 'App\Http\Controllers\BoardController@add');

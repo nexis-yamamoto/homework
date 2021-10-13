@@ -61,6 +61,7 @@
         </table>
     </form>
 
+    別viewの埋め込み
     @include('bookmark.create')
 
 @endsection
