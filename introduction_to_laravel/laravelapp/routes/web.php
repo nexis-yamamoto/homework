@@ -94,6 +94,13 @@ Route::get('board', 'App\Http\Controllers\BoardController@index');
 Route::get('board/add', 'App\Http\Controllers\BoardController@add');
 Route::post('board/add', 'App\Http\Controllers\BoardController@create');
 
+// resourceでつくったコントローラはresourceでまとめてrouteできる
+Route::resource('bookmark', 'App\Http\Controllers\BookmarkController');
+
+
+
+
+
 ///
 /// 以下直に返す例
 ///

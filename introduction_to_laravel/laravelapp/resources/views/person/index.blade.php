@@ -8,6 +8,7 @@
 @endsection
 
 @section('content')
+
     <p>投稿ありユーザ</p>
     <table>
         <tr><th>Name</th><th>Mail</th><th>Age</th><th>toString<br/>(モデル呼び出し)</th><th>投稿</th><th>Action</th></tr>
@@ -59,6 +60,8 @@
             <tr><th></th><td><input type="submit" value="send"/></td></tr>
         </table>
     </form>
+
+    @include('bookmark.create')
 
 @endsection
 
