@@ -1,0 +1,5 @@
+{
+    "require": {
+        "mstaack/laravel-postgis": "^5.4"
+    }
+}
