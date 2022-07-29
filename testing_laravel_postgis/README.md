@@ -11,6 +11,7 @@ $ sudo apt install php -y
 # for laravel
 $ sudo apt install php-xml
 $ sudo apt install php-curl
+$ sudo apt install php-pgsql
 
 $ sudo apt install wget curl gnupg2 software-properties-common apt-transport-https -y
 $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -105,10 +106,38 @@ add the DatabaseServiceProvider to config/app.php
 
 ```
 
+edit .env file
+```
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=map
+DB_USERNAME=postgres
+DB_PASSWORD=
+```
 
+tutorial
+```
+php artisan make:model Location
+php artisan make:migration create_locations_table
+```
 
-
+```
+php artisan migrate
+```
 
 https://laravel.com/docs/9.x
 
 https://github.com/mstaack/laravel-postgis
+
+
+
+# could not find driver => php-pgsql
+
+```
+$ php artisan migrate
+
+   Illuminate\Database\QueryException
+
+  could not find driver (SQL: select * from information_schema.tables where table_catalog = map and table_schema = public and table_name = migrations and table_type = 'BASE TABLE')
+```
