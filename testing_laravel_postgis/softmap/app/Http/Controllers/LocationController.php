@@ -13,7 +13,8 @@ class LocationController extends Controller
 {
     public function index()
     {
-        echo 'hello';
+        echo '<p><a href="/new">add new record</a></p>';
+        echo '<p><a href="/create">add new table</a></p>';
 //        return view('welcome');
     }
     

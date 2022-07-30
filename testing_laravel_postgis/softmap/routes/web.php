@@ -17,4 +17,6 @@ use Illuminate\Support\Facades\Route;
 //    return view('welcome');
 //});
 Route::get('/', 'App\Http\Controllers\LocationController@index');
-Route::get('/create', 'App\Http\Controllers\LocationController@create');
+Route::get('/new', 'App\Http\Controllers\LocationController@create');
+
+Route::get('/create', 'App\Http\Controllers\UpperController@create');

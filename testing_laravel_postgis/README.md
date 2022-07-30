@@ -120,6 +120,7 @@ tutorial
 ```
 php artisan make:model Location
 php artisan make:migration create_locations_table
+php artisan make:controller LocationController
 ```
 
 ```
@@ -129,6 +130,20 @@ php artisan migrate
 https://laravel.com/docs/9.x
 
 https://github.com/mstaack/laravel-postgis
+
+
+
+[create table先のschema変更]
+
+* pgsql driverを二つ変える
+  * 同時に2つのconnectionはできないのでトランザクションできなくて採用できないか
+
+
+dynamic table create
+```
+$ php artisan make:migration create_pool_schema
+$ php artisan make:controller UpperController
+```
 
 
 
