@@ -9,9 +9,7 @@ $ sudo apt install vim git unzip -y
 $ sudo apt install php -y
 
 # for laravel
-$ sudo apt install php-xml
-$ sudo apt install php-curl
-$ sudo apt install php-pgsql
+$ sudo apt install php-curl php-xml php-pgsql -y
 
 $ sudo apt install wget curl gnupg2 software-properties-common apt-transport-https -y
 $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -125,11 +123,8 @@ php artisan make:controller LocationController
 
 ```
 php artisan migrate
+php artisan migrate:rollback
 ```
-
-https://laravel.com/docs/9.x
-
-https://github.com/mstaack/laravel-postgis
 
 
 
@@ -143,6 +138,7 @@ dynamic table create
 ```
 $ php artisan make:migration create_pool_schema
 $ php artisan make:controller UpperController
+$ php artisan make:migration create_meta_table
 ```
 
 
@@ -156,3 +152,15 @@ $ php artisan migrate
 
   could not find driver (SQL: select * from information_schema.tables where table_catalog = map and table_schema = public and table_name = migrations and table_type = 'BASE TABLE')
 ```
+
+
+# reference
+
+laravel
+https://laravel.com/docs/9.x
+
+laravel postgis
+https://github.com/mstaack/laravel-postgis
+
+laravel api
+https://laravel.com/api/9.x/Illuminate/Database/Connection.html

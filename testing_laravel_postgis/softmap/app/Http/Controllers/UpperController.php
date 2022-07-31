@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use MStaack\LaravelPostgis\Schema\Blueprint;
-
+use App\Models\Meta;
 
 
 class UpperController extends Controller
 {
     public function create()
     {
-        Schema::dropIfExists('tests');
+        // against pool schema
+        Schema::connection('pool')->dropIfExists('tests');
 
         Schema::connection('pool')->create('tests', function (Blueprint $table) {
             $table->id();
@@ -21,6 +22,28 @@ class UpperController extends Controller
             $table->point('location', 'GEOMETRY', 27700); // GEOMETRY column with SRID of 27700.
             $table->timestamps();
         });
+    }
 
+    public function add()
+    {
+        // TODO against pool schema
+        if (Schema::connection('pool')->hasColumn('tests', 'address2')) {
+            Schema::connection('pool')->table('tests', function(BluePrint $table){
+                $table->dropColumn('address2');
+            });
+        }
+//        if (Schema::hasColumn('tests', 'address')) {
+//            $table->cropColumn('address');
+//        }
+
+        Schema::connection('pool')->table('tests', function (Blueprint $table) {
+            $table->string('address2');
+        });
+
+        Schema::connection('pgsql')->table('meta', function (Blueprint $table) {
+            $meta = new Meta();
+            $meta->column_name = 'address2';
+            $meta->save();
+        });
     }
 }

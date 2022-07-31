@@ -15,6 +15,7 @@ class LocationController extends Controller
     {
         echo '<p><a href="/new">add new record</a></p>';
         echo '<p><a href="/create">add new table</a></p>';
+        echo '<p><a href="/add">add new column</a></p>';
 //        return view('welcome');
     }
     
