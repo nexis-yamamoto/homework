@@ -21,3 +21,5 @@ Route::get('/new', 'App\Http\Controllers\LocationController@create');
 
 Route::get('/create', 'App\Http\Controllers\UpperController@create');
 Route::get('/add', 'App\Http\Controllers\UpperController@add');
+
+Route::get('/map', 'App\Http\Controllers\LocationController@map');

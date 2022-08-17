@@ -45,4 +45,10 @@ class LocationController extends Controller
         //$location2->location instanceof Point // true
     }
 
+    public function map()
+    {
+        $data=array();
+        return view('map', $data);
+    }
+
 }
