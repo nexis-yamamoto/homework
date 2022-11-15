@@ -10,18 +10,46 @@ use App\Models\Meta;
 
 class UpperController extends Controller
 {
-    public function create()
+    public function form()
     {
-        // against pool schema
-        Schema::connection('pool')->dropIfExists('tests');
+        $data = [
+            'msg' => 'これはBlade Templateのサンプルです'
+        ];
+        // resources/viewsの下の practice/form.phpを指す
+        // practice/form.blade.phpがあるときはこちらが優先
+        return view('new', $data);
+    }
+/*    public function post(Request $request)
+    {
+        $msg = $request->name;
+        $data = [
+            'msg' => $msg
+        ];
+        return view('new', $data);
+    }*/
 
-        Schema::connection('pool')->create('tests', function (Blueprint $table) {
+    public function create(Request $request)
+    {
+        // postパラメータ受け取り
+        $name = $request->name;
+
+        // テーブル作成実行
+        // against pool schema
+        Schema::connection('pool')->dropIfExists($name);
+
+        Schema::connection('pool')->create($name, function (Blueprint $table) {
             $table->id();
             //$table->string('address')->unique();
             //$table->point('location'); // GEOGRAPHY POINT column with SRID of 4326 (these are the default values).
             $table->point('location', 'GEOMETRY', 27700); // GEOMETRY column with SRID of 27700.
             $table->timestamps();
         });
+
+        // 結果view表示
+        $data = [
+            'msg' => $name . ' table created.'
+        ];
+        return view('new', $data);
     }
 
     public function add()

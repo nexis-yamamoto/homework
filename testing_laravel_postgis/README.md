@@ -142,6 +142,11 @@ $ php artisan make:migration create_meta_table
 ```
 
 
+eloquent
+```
+$ php artisan make:model Location
+```
+
 
 # could not find driver => php-pgsql
 

@@ -19,7 +19,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', 'App\Http\Controllers\LocationController@index');
 Route::get('/new', 'App\Http\Controllers\LocationController@create');
 
-Route::get('/create', 'App\Http\Controllers\UpperController@create');
+
+Route::get('/form', 'App\Http\Controllers\UpperController@form');
+Route::post('/post', 'App\Http\Controllers\UpperController@post');
+//Route::get('/create', 'App\Http\Controllers\UpperController@create');
+Route::post('/create', 'App\Http\Controllers\UpperController@create');
 Route::get('/add', 'App\Http\Controllers\UpperController@add');
 
-Route::get('/map', 'App\Http\Controllers\LocationController@map');
+Route::get('/leaflet', 'App\Http\Controllers\LocationController@leaflet');
+Route::get('/openlayers', 'App\Http\Controllers\LocationController@openlayers');
+
+Route::get('/geojson', 'App\Http\Controllers\LocationController@geojson');
+
+

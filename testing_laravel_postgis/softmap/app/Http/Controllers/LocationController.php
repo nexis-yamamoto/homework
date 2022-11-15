@@ -3,20 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
+use App\Models\Meta;
+
 use MStaack\LaravelPostgis\Geometries\Point;
 use MStaack\LaravelPostgis\Geometries\LineString;
 use MStaack\LaravelPostgis\Geometries\Polygon;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LocationController extends Controller
 {
     public function index()
     {
-        echo '<p><a href="/new">add new record</a></p>';
-        echo '<p><a href="/create">add new table</a></p>';
-        echo '<p><a href="/add">add new column</a></p>';
-//        return view('welcome');
+        $tables = DB::select("SELECT schemaname, tablename from pg_tables where schemaname like 'pool'");
+        //$tables = Meta::all();
+        $data =  ([
+            'tables' => $tables,
+        ]);
+        return view('tables', $data);
     }
     
     public function create()
@@ -45,10 +50,24 @@ class LocationController extends Controller
         //$location2->location instanceof Point // true
     }
 
-    public function map()
+    public function leaflet()
     {
-        $data=array();
-        return view('map', $data);
+        $data = array();
+        return view('leaflet', $data);
+    }
+    public function openlayers()
+    {
+        $data = array();
+        return view('openlayers', $data);
+    }
+    public function geojson()
+    {
+        $d = Location::all();
+        /* $d = ([
+            'name' => 'Abigail',
+            'state' => 'CA'
+        ]);*/
+        return response()->json($d);
     }
 
 }
