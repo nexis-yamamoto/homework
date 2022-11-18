@@ -141,3 +141,17 @@ def logging():
     app.logger.warning('A warning occurred (%d apples)', 42)
     app.logger.error('An error occurred')
     return 'logged'
+
+
+
+import psycopg2
+@app.route('/version/')
+def db_version():
+    dsn = "dbname=tracea host=localhost user=postgres"
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute("select version()")
+    r = cur.fetchone()
+    cur.close()
+    conn.close()
+    return f"result {r}"
