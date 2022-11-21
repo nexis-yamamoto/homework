@@ -1,0 +1,145 @@
+<!doctype html>
+
+<script>
+let hojos = {{ hojos | tojson }};  //ここでjsの変数として再定義
+console.log(hojos);
+hojos.forEach(hojo => {
+    console.log(hojo);
+});
+</script>
+
+
+<div id="mapContainer">
+</div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+<style type='text/css'>
+    #map_place {
+        height: 100%;
+        /* 高さが低いとポップアップとプルダウンが被ってしまう */
+        height: 430px;
+        /* 地図がフッダーの上に表示されてしまうため */
+        z-index: 0;
+        margin-bottom: 30px;
+    }
+    @media screen and (max-width: 767px) {
+        dl {
+            line-height: 2em;
+            margin: 0em 0em;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+// https://qiita.com/TakeshiNickOsanai/items/783caa9f31bcf762da16#leaflet-openstreetmap-%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E4%BD%BF%E3%81%84%E6%96%B9
+const map_div = document.createElement('div');
+map_div.id = 'map_place';
+console.log(map_div);
+// https://www.task-notes.com/entry/20161020/1476974565
+const view = document.getElementById('mapContainer');
+view.appendChild(map_div);
+console.log(view);
+
+
+try {
+
+    let map = L.map('map_place', {
+        center: [0, 0],
+        zoom: 17,
+
+        // ファイル名一覧のプルダウンがマップ上にあるため
+        // ファイル名を選択したと同時にマップをクリックしたことになり
+        // ポップアップが消えてしまう
+
+        // マップをクリックしてもポップアップが消えないようにする
+        closePopupOnClick: false
+    });
+
+    // マップクリック確認用
+    /*map.on('click', function(e) {
+        console.log("map clicked");
+        // 耕地の緯度経度確認用
+        console.log("緯度:" + e.latlng.lat + " 経度:" + e.latlng.lng); 
+    })*/
+
+    // OpenStreetMap から地図画像を読み込む
+
+    let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+    });
+    tileLayer.addTo(map);
+
+    // 全体表示でgetBoundsするため、写真も耕地も同じところに入れる
+    const group = L.featureGroup();
+
+    const markers = [];
+
+    // https://stackoverflow.com/questions/22538473/leaflet-center-popup-and-marker-to-the-map
+    map.on('popupopen', function(e) {
+        // ポップアップの緯度経度からピクセル座標を求める
+        let project = map.project(e.target._popup._latlng);
+        // popupの高さ(height)の1/2分だけ上にずれているため
+        project.y -= e.target._popup._container.clientHeight/2;
+        // setviewと同じ？
+        // https://gis.stackexchange.com/questions/283487/leaflet-setview-vs-panto
+        map.panTo(map.unproject(project),{animate: true});
+    });
+
+    const layer_style = {
+        stroke: true,
+        color: "black",
+        weight: 0.5,
+        opacity: 0.5,
+        fill: true,
+        fillcolor: "black",
+        fillOpacity: 0.5
+    };
+
+    hojos.forEach( f => {
+        //console.log(f);
+        f.webcolor = to_webcolor(f.properties.color);
+    });
+
+    // env_js
+    // "255 255 0" => "#ffff00"
+    function to_webcolor(text_color) {
+        let colors = text_color.split(' ');
+        let webcolor = "#" + colors.map(function(value) {
+            var s = "0" + parseInt(value).toString(16); // 0つけて最大3桁
+            return s.slice(-2); //後ろ2桁を切り出し
+        }).join("");
+        return webcolor;
+    }
+
+    // 図形のレイヤ登録時ハンドラ
+    function onEachFeature(feature, layer) {
+        console.log(feature);
+        layer.bindTooltip(
+            feature.properties.no + '-' + feature.properties.subno + "<br/>" + feature.properties.crop_name,
+            { permanent: true, direction: 'center'}
+        );
+        // スタイルオブジェクトをコピーして色だけ書き換えたもの
+        let s = Object.assign({}, layer_style);
+        s.color = feature.webcolor;
+        layer.setStyle(s);
+        group.addLayer(layer);
+    }
+
+    L.geoJSON(hojos, {
+        style: layer_style,
+        onEachFeature: onEachFeature
+    });
+    group.addTo(map);
+    map.fitBounds(group.getBounds());
+} catch (e) {
+    console.log(e.message);
+    console.log(e);
+}
+
+
+// 地図が存在しない場合は非表示にする(スペースが無駄に確保されてしまうため)
+if (!map_div.hasChildNodes()) {
+    map_place.style.display = 'none';
+}
+</script>

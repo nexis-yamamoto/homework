@@ -155,3 +155,66 @@ def db_version():
     cur.close()
     conn.close()
     return f"result {r}"
+
+@app.route('/psycopg2_geojson')
+def psycopg2_geojson():
+    dsn = "dbname=tracea host=localhost user=postgres"
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute("select ST_AsGeoJSON(ST_Transform(geometry, 4326)) from hojo_for_histories where year=2022")
+    r = cur.fetchone()
+
+    records = []
+    for row in cur:
+        print(row) # row is tuple
+        records += row
+
+    cur.close()
+    conn.close()
+    return records
+
+import json
+
+@app.route('/leaflet')
+def leaflet():
+    dsn = "dbname=tracea host=localhost user=postgres"
+    hojos = []
+    sql = '''
+select
+  ST_AsGeoJSON(ST_Transform(geometry, 4326)) as geom,
+  h.no, h.subno,
+  c.name as crop_name,
+  c.color as color
+from hojo_for_histories h
+join crops c on (h.crop_code=c.code)
+where (year=2022 and farmer_code=16511)'''
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            for row in cur:
+                geo = json.loads(row[0])
+                feature = {
+                    'type': 'Feature',
+                    'geometry': geo,
+                    'properties': {
+                        'no': row[1],
+                        'subno': row[2],
+                        'crop_name': row[3],
+                        'color': row[4]
+                    }
+                }
+                print(feature)
+                hojos.append(feature)
+    return render_template('leaflet.html', hojos=hojos) #, json=hojos_json_string)
+
+@app.route('/hojos')
+def hojos():
+    hojos = []
+    dsn = "dbname=tracea host=localhost user=postgres"
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute("select ST_AsGeoJSON(ST_Transform(geometry, 4326)) from hojo_for_histories where year=2022 and farmer_code=16511")
+            for row in cur:
+                hojos += row
+    hojos_json_string = json.dumps(hojos, ensure_ascii=False)
+    return hojos_json_string
