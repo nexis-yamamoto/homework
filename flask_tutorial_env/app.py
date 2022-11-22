@@ -175,19 +175,18 @@ def psycopg2_geojson():
 
 import json
 
-@app.route('/leaflet')
-def leaflet():
+def geojson(epsg):
     dsn = "dbname=tracea host=localhost user=postgres"
     hojos = []
-    sql = '''
-select
-  ST_AsGeoJSON(ST_Transform(geometry, 4326)) as geom,
+    sql = """select
+  ST_AsGeoJSON(ST_Transform(geometry, {srs})) as geom,
   h.no, h.subno,
   c.name as crop_name,
   c.color as color
 from hojo_for_histories h
 join crops c on (h.crop_code=c.code)
-where (year=2022 and farmer_code=16511)'''
+where (year=2022 and farmer_code=16511)""".format(srs=epsg)
+    print(sql)
     with psycopg2.connect(dsn) as conn:
         with conn.cursor() as cur:
             cur.execute(sql)
@@ -205,7 +204,22 @@ where (year=2022 and farmer_code=16511)'''
                 }
                 print(feature)
                 hojos.append(feature)
+    return hojos
+
+@app.route('/leaflet')
+def leaflet():
+    hojos = geojson(4326)
     return render_template('leaflet.html', hojos=hojos) #, json=hojos_json_string)
+
+@app.route('/openlayers_sample')
+def openlayers_sample():
+    return render_template('openlayers_sample.html')
+
+@app.route('/openlayers')
+def openlayers():
+    hojos = geojson(4326)
+    return render_template('openlayers.html', hojos=hojos) #, json=hojos_json_string)
+
 
 @app.route('/hojos')
 def hojos():
