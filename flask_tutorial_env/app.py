@@ -209,6 +209,7 @@ where (year=2022 and farmer_code=16511)""".format(srs=epsg)
 @app.route('/leaflet')
 def leaflet():
     hojos = geojson(4326)
+    #hojos = geojson(3857)
     return render_template('leaflet.html', hojos=hojos) #, json=hojos_json_string)
 
 @app.route('/openlayers_sample')
@@ -217,18 +218,21 @@ def openlayers_sample():
 
 @app.route('/openlayers')
 def openlayers():
-    hojos = geojson(4326)
+    hojos = geojson(3857)
     return render_template('openlayers.html', hojos=hojos) #, json=hojos_json_string)
-
 
 @app.route('/hojos')
 def hojos():
-    hojos = []
-    dsn = "dbname=tracea host=localhost user=postgres"
-    with psycopg2.connect(dsn) as conn:
-        with conn.cursor() as cur:
-            cur.execute("select ST_AsGeoJSON(ST_Transform(geometry, 4326)) from hojo_for_histories where year=2022 and farmer_code=16511")
-            for row in cur:
-                hojos += row
-    hojos_json_string = json.dumps(hojos, ensure_ascii=False)
-    return hojos_json_string
+    features = geojson(3857) # 4326
+    print(features)
+    feature_collection = {
+        'type': 'FeatureCollection',
+        'features': features,
+        'crs': {
+            'type': 'name',
+            'properties': {
+                'name': 'EPSG:3857',
+            },
+        },
+    }
+    return feature_collection

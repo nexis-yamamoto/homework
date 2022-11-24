@@ -15,15 +15,6 @@
   <body>
     <div id="map" class="map"></div>
     <script>
-//import Circle from 'ol/geom/Circle';
-//import Feature from 'ol/Feature';
-//import GeoJSON from 'ol/format/GeoJSON';
-//import Map from 'ol/Map';
-//import View from 'ol/View';
-//import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
-//import {OSM, Vector as VectorSource} from 'ol/source';
-//import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-
 const image = new ol.style.Circle({
   radius: 5,
   fill: null,
@@ -111,16 +102,59 @@ const hojosObject = {
   'features': hojos
 }
 console.log(hojosObject);
+
+
 const vectorSource = new ol.source.Vector({
+//  features: new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(hojosObject),
   features: new ol.format.GeoJSON().readFeatures(hojosObject),
 });
-
 //vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
-
 const vectorLayer = new ol.layer.Vector({
   source: vectorSource,
   style: styleFunction,
 });
+
+// env_js
+// "255 255 0" => "#ffff00"
+function to_webcolor(text_color) {
+    let colors = text_color.split(' ');
+    let webcolor = "#" + colors.map(function(value) {
+        var s = "0" + parseInt(value).toString(16); // 0つけて最大3桁
+        return s.slice(-2); //後ろ2桁を切り出し
+    }).join("");
+    return webcolor;
+}
+
+const source2 = new ol.source.Vector({
+  url: '/hojos',
+  //projection: 'EPSG:3857',
+  format: new ol.format.GeoJSON(
+//    { featureProjection: 'EPSG:3857' }
+  ),
+});
+
+const vectorLayer2 = new ol.layer.Vector({
+  //background: '#1a2b39',
+  //source: new ol.source.Vector({
+  //  url: '/hojos',
+  //  projection: 'EPSG:3857',
+  //  format: new ol.format.GeoJSON(),
+  //}),
+  source: source2,
+  style: function (feature) {
+    console.log('style dunction2' + feature.get('no'));
+    console.log(feature);
+    const style = new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: '#ee0000',
+      }),
+    });
+    const color = to_webcolor(feature.get('color')) || '#ee0000';
+    style.getFill().setColor(color);
+    return style;
+  },
+});
+
 
 const map = new ol.Map({
   layers: [
@@ -128,16 +162,22 @@ const map = new ol.Map({
       source: new ol.source.OSM(),
     }),
     vectorLayer,
+    //vectorLayer2,
   ],
   target: 'map',
   view: new ol.View({
-    projection: 'EPSG:4326', //default=3857
+//    projection: 'EPSG:4326', //default=3857
+    projection: 'EPSG:3857', //default
     center: [0, 0],
     zoom: 2,
   }),
 });
 
 map.getView().fit(vectorSource.getExtent());
+// TODO urlでとってきたgeojsonだとgetExtentできない？
+//const extent = source2.getExtent();
+//console.log(extent);
+//map.getView().fit(extent);
 
     </script>
   </body>
