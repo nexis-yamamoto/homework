@@ -164,6 +164,20 @@ const vectorLayer2 = new ol.layer.Vector({
       fill: new ol.style.Fill({
         color: '#ee0000',
       }),
+      text: new ol.style.Text({
+        font: '16px sans-serif',
+        textAlign: 'right',
+        justify: 'left',
+            text: feature.get('crop_name'),
+            fill: new ol.style.Fill({
+                color: [255, 255, 255, 1],
+            }),
+            backgroundFill: new ol.style.Fill({
+                color: [168, 50, 153, 0.6],
+            }),
+            padding: [2, 2, 2, 2],
+            overflow: true
+        }),
     });
     const color = to_webcolor(feature.get('color')) || '#ee0000';
     style.getFill().setColor(color);
@@ -176,8 +190,8 @@ const map = new ol.Map({
     new ol.layer.Tile({
       source: new ol.source.OSM(),
     }),
-    //vectorLayer,
-    vectorLayer2,
+    //vectorLayer, // ソース内のgeojsonから
+    vectorLayer2, // url指定のgeojsonから
   ],
   target: 'map',
   view: new ol.View({
