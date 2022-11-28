@@ -103,12 +103,14 @@ const hojosObject = {
 }
 console.log(hojosObject);
 
-
+// ソースに含まれたgeojsonをソースとする
 const vectorSource = new ol.source.Vector({
 //  features: new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(hojosObject),
   features: new ol.format.GeoJSON().readFeatures(hojosObject),
 });
-//vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+// 手動で図形を追加する場合
+// vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+// レイヤ
 const vectorLayer = new ol.layer.Vector({
   source: vectorSource,
   style: styleFunction,
@@ -125,12 +127,26 @@ function to_webcolor(text_color) {
     return webcolor;
 }
 
+// urlに指定された場所のgeojsonをソースとする
 const source2 = new ol.source.Vector({
   url: '/hojos',
   //projection: 'EPSG:3857',
   format: new ol.format.GeoJSON(
-//    { featureProjection: 'EPSG:3857' }
+    { featureProjection: 'EPSG:3857' }
   ),
+});
+
+// geojsonのダウンロードが終わってからgetExtent => fitする
+// https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
+source2.once('change', function(e) {
+    console.log('source2 changed' + e);
+    console.log(e);
+    if (source2.getState() === 'ready') {
+        //if (layers[0].getSource().getFeatures().length > 0) {
+        if (e.target.getFeatures().length > 0) {
+            map.getView().fit(source2.getExtent(), map.getSize());
+        }
+    }
 });
 
 const vectorLayer2 = new ol.layer.Vector({
@@ -155,14 +171,13 @@ const vectorLayer2 = new ol.layer.Vector({
   },
 });
 
-
 const map = new ol.Map({
   layers: [
     new ol.layer.Tile({
       source: new ol.source.OSM(),
     }),
-    vectorLayer,
-    //vectorLayer2,
+    //vectorLayer,
+    vectorLayer2,
   ],
   target: 'map',
   view: new ol.View({
@@ -172,12 +187,10 @@ const map = new ol.Map({
     zoom: 2,
   }),
 });
+console.log(map);
 
-map.getView().fit(vectorSource.getExtent());
-// TODO urlでとってきたgeojsonだとgetExtentできない？
-//const extent = source2.getExtent();
-//console.log(extent);
-//map.getView().fit(extent);
+// ロードが発生しない場合はここでfit可能
+//map.getView().fit(vectorSource.getExtent());
 
     </script>
   </body>
