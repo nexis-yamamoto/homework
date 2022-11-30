@@ -2,19 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>GeoJSON</title>
+    <title>Map</title>
+    <script src="static/progressbar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
     <style>
       .map {
         width: 100%;
-        height: 400px;
+        height: 600px;
       }
     </style>
   </head>
   <body>
     <div id="map" class="map"></div>
+    <div class="progress" id="progress"></div>
+    <select>
+    <option>a</option>
+    </input>
+
     <script>
+
 const image = new ol.style.Circle({
   radius: 5,
   fill: null,
@@ -138,12 +145,27 @@ const source2 = new ol.source.Vector({
     ),
 });
 
+let feature_number = -1;
+let progress = 0;
+const getProgress = function () {
+    if (progress > feature_number) {
+        return 1;
+    }
+    const p = 0.5 + (progress / (feature_number * 2));
+    //console.log(p);
+    return 0.5 + (progress / (feature_number * 2));
+};
+
+
 // geojsonのダウンロードが終わってからgetExtent => fitする
 // https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
 source2.once('change', function(e) {
     console.log('source2 changed' + e);
     console.log(e);
     if (source2.getState() === 'ready') {
+        feature_number = e.target.getFeatures().length;
+        console.log(feature_number + ' features loaded.');
+        bar.animate(progress);
         //if (layers[0].getSource().getFeatures().length > 0) {
         if (e.target.getFeatures().length > 0) {
             map.getView().fit(source2.getExtent(), map.getSize());
@@ -160,6 +182,8 @@ const vectorLayer2 = new ol.layer.Vector({
   //}),
   source: source2,
   style: function (feature) {
+    progress += 1;
+    bar.set(getProgress());
     //console.log('on style function' + feature.get('no'));
     //console.log(feature);
     const style = new ol.style.Style({
@@ -213,6 +237,15 @@ console.log(map);
 // ロードが発生しない場合はここでfit可能
 //map.getView().fit(vectorSource.getExtent());
 
+const bar = new ProgressBar.Line('#progress', {
+    color: '#FCB03C',
+    duration: 1000,
+    easing: 'easeInOut'
+});
+
+window.onload = function onLoad() {
+    bar.animate(0.1);
+};
     </script>
   </body>
 </html>

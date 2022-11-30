@@ -175,17 +175,22 @@ def psycopg2_geojson():
 
 import json
 
-def geojson(epsg):
+def geojson(epsg, farmer_code=16511):
     dsn = "dbname=tracea host=localhost user=postgres"
     hojos = []
     sql = """select
   ST_AsGeoJSON(ST_Transform(geometry, {srs})) as geom,
   h.no, h.subno,
   c.name as crop_name,
+  h.farmer_name,
   c.color as color
 from hojo_for_histories h
 join crops c on (h.crop_code=c.code)
-where (year=2022 and farmer_code=16511)""".format(srs=epsg)
+where (year=2022 """.format(srs=epsg)
+    if farmer_code == 0:
+        sql += ")"
+    else:
+        sql += "and farmer_code={code})".format(code=farmer_code)
     print(sql)
     with psycopg2.connect(dsn) as conn:
         with conn.cursor() as cur:
@@ -199,10 +204,11 @@ where (year=2022 and farmer_code=16511)""".format(srs=epsg)
                         'no': row[1],
                         'subno': row[2],
                         'crop_name': row[3],
-                        'color': row[4]
+                        'farmer_name': row[4],
+                        'color': row[5]
                     }
                 }
-                print(feature)
+                #print(feature)
                 hojos.append(feature)
     return hojos
 
@@ -221,10 +227,15 @@ def openlayers():
     hojos = geojson(3857)
     return render_template('openlayers.html', hojos=hojos) #, json=hojos_json_string)
 
-@app.route('/hojos')
-def hojos():
-    features = geojson(3857) # 4326
-    print(features)
+@app.route('/map')
+def map():
+    hojos = geojson(3857)
+    return render_template('map.html', hojos=hojos) #, json=hojos_json_string)
+
+@app.route('/hojos/<int:code>')
+def hojos(code):
+    features = geojson(3857, code) # 4326
+    #print(features)
     feature_collection = {
         'type': 'FeatureCollection',
         'features': features,
