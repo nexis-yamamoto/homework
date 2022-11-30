@@ -22,107 +22,6 @@
     </select>
 
     <script>
-const image = new ol.style.Circle({
-  radius: 5,
-  fill: null,
-  stroke: new ol.style.Stroke({color: 'red', width: 1}),
-});
-
-const styles = {
-  'Point': new ol.style.Style({
-    image: image,
-  }),
-  'LineString': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'green',
-      width: 1,
-    }),
-  }),
-  'MultiLineString': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'green',
-      width: 1,
-    }),
-  }),
-  'MultiPoint': new ol.style.Style({
-    image: image,
-  }),
-  'MultiPolygon': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'yellow',
-      width: 1,
-    }),
-    fill: new ol.style.Fill({
-      color: 'rgba(255, 255, 0, 0.1)',
-    }),
-  }),
-  'Polygon': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'blue',
-      lineDash: [4],
-      width: 3,
-    }),
-    fill: new ol.style.Fill({
-      color: 'rgba(0, 0, 255, 0.1)',
-    }),
-  }),
-  'GeometryCollection': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'magenta',
-      width: 2,
-    }),
-    fill: new ol.style.Fill({
-      color: 'magenta',
-    }),
-    image: new ol.style.Circle({
-      radius: 10,
-      fill: null,
-      stroke: new ol.style.Stroke({
-        color: 'magenta',
-      }),
-    }),
-  }),
-  'Circle': new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: 'red',
-      width: 2,
-    }),
-    fill: new ol.style.Fill({
-      color: 'rgba(255,0,0,0.2)',
-    }),
-  }),
-};
-
-const styleFunction = function (feature) {
-  return styles[feature.getGeometry().getType()];
-};
-
-const hojos = {{ hojos | tojson }};  //ここでjsの変数として再定義
-const hojosObject = {
-  'type': 'FeatureCollection',
-  'crs': {
-    'type': 'name',
-    'properties': {
-      'name': 'EPSG:3857',
-    },
-  },
-  'features': hojos
-}
-console.log(hojosObject);
-
-// ソースに含まれたgeojsonをソースとする
-const vectorSource = new ol.source.Vector({
-//  features: new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(hojosObject),
-  features: new ol.format.GeoJSON().readFeatures(hojosObject),
-});
-// 手動で図形を追加する場合
-// vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
-// レイヤ
-const vectorLayer = new ol.layer.Vector({
-  source: vectorSource,
-  style: styleFunction,
-});
-
 // env_js
 // "255 255 0" => "#ffff00"
 function to_webcolor(text_color) {
@@ -133,17 +32,6 @@ function to_webcolor(text_color) {
     }).join("");
     return webcolor;
 }
-
-// urlに指定された場所のgeojsonをソースとする
-const source2 = new ol.source.Vector({
-//    url: '/hojos/16511',
-    url: '/hojos/79415',
-//    url: '/hojos/0',//全件
-    //projection: 'EPSG:3857',
-    format: new ol.format.GeoJSON(
-        { featureProjection: 'EPSG:3857' }
-    ),
-});
 
 let feature_number = -1;
 let progress = 0;
@@ -156,24 +44,7 @@ const getProgress = function () {
     return 0.5 + (progress / (feature_number * 2));
 };
 
-
-// geojsonのダウンロードが終わってからgetExtent => fitする
-// https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
-source2.once('change', function(e) {
-    console.log('source2 changed' + e);
-    console.log(e);
-    if (source2.getState() === 'ready') {
-        feature_number = e.target.getFeatures().length;
-        console.log(feature_number + ' features loaded.');
-        bar.animate(progress);
-        //if (layers[0].getSource().getFeatures().length > 0) {
-        if (e.target.getFeatures().length > 0) {
-            map.getView().fit(source2.getExtent(), map.getSize());
-        }
-    }
-});
-
-const fearureStyle = function (feature) {
+const featureStyle = function (feature) {
     progress += 1;
     bar.set(getProgress());
     //console.log('on style function' + feature.get('no'));
@@ -207,51 +78,6 @@ const fearureStyle = function (feature) {
     return style;
 }
 
-const vectorLayer2 = new ol.layer.Vector({
-  //background: '#1a2b39',
-  //source: new ol.source.Vector({
-  //  url: '/hojos',
-  //  projection: 'EPSG:3857',
-  //  format: new ol.format.GeoJSON(),
-  //}),
-  className: 'layer-features',
-  properties: {'name': 'features'},
-  source: source2,
-  style: function (feature) {
-    progress += 1;
-    bar.set(getProgress());
-    //console.log('on style function' + feature.get('no'));
-    //console.log(feature);
-    const style = new ol.style.Style({
-        stroke: new ol.style.Stroke({
-        color: 'magenta',
-      }),
-      // 塗り
-      fill: new ol.style.Fill({
-        color: '#ee0000',
-      }),
-      // ラベル
-      text: new ol.style.Text({
-        font: '16px sans-serif',
-        textAlign: 'right',
-        justify: 'left',
-            text: feature.get('crop_name') + ':' + feature.get('farmer_name'),
-            fill: new ol.style.Fill({
-                color: [255, 255, 255, 1],
-            }),
-            backgroundFill: new ol.style.Fill({
-                color: [168, 50, 153, 0.6],
-            }),
-            padding: [2, 2, 2, 2],
-            overflow: true // 図形からはみ出るラベルも表示する
-        }),
-    });
-    const color = to_webcolor(feature.get('color')) || '#ee0000';
-    style.getFill().setColor(color);
-    return style;
-  },
-});
-
 const map = new ol.Map({
   layers: [
     new ol.layer.Tile({
@@ -259,8 +85,7 @@ const map = new ol.Map({
         properties: {'name': 'osm'},
         source: new ol.source.OSM(),
     }),
-    //vectorLayer, // ソース内のgeojsonから
-    vectorLayer2, // url指定のgeojsonから
+    //vectorLayer2, // url指定のgeojsonから
   ],
   target: 'map',
   view: new ol.View({
@@ -272,9 +97,6 @@ const map = new ol.Map({
 });
 console.log(map);
 
-// ロードが発生しない場合はここでfit可能
-//map.getView().fit(vectorSource.getExtent());
-
 const bar = new ProgressBar.Line('#progress', {
     color: '#FCB03C',
     duration: 1000,
@@ -285,13 +107,7 @@ window.onload = function onLoad() {
     bar.animate(0.1);
 };
 
-
-// selection change
-function onChangeSelect() {
-    console.log('farmer select changed');
-    console.log(this.selectedIndex); //this=select
-    console.log(this.value);
-
+function addFarmersLayer(farmer_code) {
     // 既存レイヤを削除
     const layers = map.getLayers();
     layers.forEach(layer => {
@@ -303,11 +119,13 @@ function onChangeSelect() {
 
     // 新規レイヤを追加
     const newSource = new ol.source.Vector({
-        url: '/hojos/' + this.value,
+        url: '/hojos/' + farmer_code,
         format: new ol.format.GeoJSON(
             { featureProjection: 'EPSG:3857' }
         ),
     });
+    // geojsonのダウンロードが終わってからgetExtent => fitする
+    // https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
     newSource.once('change', function(e) {
         console.log('newSource changed' + e);
         console.log(e);
@@ -325,9 +143,18 @@ function onChangeSelect() {
         className: 'layer-features',
         properties: {'name': 'features'},
         source: newSource,
-        style: fearureStyle,// callback function
+        style: featureStyle,// callback function
     });
     map.addLayer(newLayer);
+}
+
+// selection change
+function onChangeSelect() {
+    console.log('farmer select changed');
+    console.log(this.selectedIndex); //this=select
+    console.log(this.value);
+
+    addFarmersLayer(this.value);
 }
 
 const el = document.getElementById("farmer_select");
