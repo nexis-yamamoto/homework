@@ -19,6 +19,7 @@
     <select id="farmer_select">
         <option value="16511">a</option>
         <option value="79415">b</option>
+        <option value="0">all</option>
     </select>
 
     <script>
@@ -35,18 +36,25 @@ function to_webcolor(text_color) {
 
 let feature_number = -1;
 let progress = 0;
-const getProgress = function () {
-    if (progress > feature_number) {
-        return 1;
-    }
-    //const p = 0.5 + (progress / (feature_number * 2));
-    //console.log(p);
-    return 0.5 + (progress / (feature_number * 2));
+const beginProgress = function(max) {
+    progress = 0;
+    feature_number = max;
+    //bar.set(0.1);
+    bar.animate(0.1);
 };
+const countProgress = function() {
+    progress++;
+    const p = 0.5 + (progress / (feature_number * 2));
+    console.log('progress=' + p);
+//    bar.set(p);
+    bar.animate(p);
+}
+const finishProgress = function() {
+    bar.animate(0);
+}
 
 const featureStyle = function (feature) {
-    progress += 1;
-    bar.set(getProgress());
+    countProgress();
     //console.log('on style function' + feature.get('no'));
     //console.log(feature);
     const style = new ol.style.Style({
@@ -103,9 +111,8 @@ const bar = new ProgressBar.Line('#progress', {
     easing: 'easeInOut'
 });
 
-window.onload = function onLoad() {
-    bar.animate(0.1);
-};
+//window.onload = function onLoad() {
+//};
 
 function addFarmersLayer(farmer_code) {
     // 既存レイヤを削除
@@ -132,7 +139,9 @@ function addFarmersLayer(farmer_code) {
         if (e.target.getState() === 'ready') {
             feature_number = e.target.getFeatures().length;
             console.log(feature_number + ' features loaded.');
-            bar.animate(progress);
+            beginProgress(feature_number);
+
+//            bar.animate(progress);
             //if (layers[0].getSource().getFeatures().length > 0) {
             if (e.target.getFeatures().length > 0) {
                 map.getView().fit(e.target.getExtent(), map.getSize());

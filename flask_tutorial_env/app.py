@@ -247,3 +247,72 @@ def hojos(code):
         },
     }
     return feature_collection
+
+from flask import request
+#from werkzeug.datastructures import ImmutableMultiDict
+import werkzeug
+
+# http://192.168.253.54:5000/get_params/?hoge=huga&moge=piyo&hoge=puyo
+# http://192.168.253.54:5000/get_params/?service=WMS&request=GetMap&layers=air&styles=&format=image%2Fpng&transparent=true&version=1.1.1&scheme=wms&continuousWorld=true&width=256&height=256&srs=EPSG%3A3857&bbox=15859766.124834653,5423971.527116109,15860377.621060936,5424583.023342389
+@app.route('/get_params/')
+def get_params():
+    # multidictは同一keyの複数レコードがあるのでリストで取れる
+    data = werkzeug.datastructures.ImmutableMultiDict([('input', 'GFG'), ('input', 'Geeks For Geeks')])
+    print(data.getlist('input'))
+    params = request.args # werkzeug.ImmutableMultiDict is MultiDict
+    print(params.keys())
+    for key in params.keys():
+        print(key, params[key])
+        print(key, params.getlist(key))
+    return 'params:' + type(params).__name__
+
+import mapscript
+from flask import make_response
+
+# http://192.168.253.54:5000/mapscript/?service=WMS&request=GetMap&layers=air&styles=&format=image%2Fpng&transparent=true&version=1.1.1&scheme=wms&continuousWorld=true&width=256&height=256&srs=EPSG%3A3857&bbox=15859766.124834653,5423971.527116109,15860377.621060936,5424583.023342389
+"""
+service ['WMS']
+request ['GetMap']
+layers ['air']
+styles ['']
+format ['image/png']
+transparent ['true']
+version ['1.1.1']
+scheme ['wms']
+continuousWorld ['true']
+width ['256']
+height ['256']
+srs ['EPSG:3857']
+bbox ['15859766.124834653,5423971.527116109,15860377.621060936,5424583.023342389']
+"""
+@app.route('/mapscript/')
+def mapscript_test():
+    params = request.args # werkzeug.ImmutableMultiDict is MultiDict
+    print(params.keys())
+
+    req = mapscript.OWSRequest()
+    #n = req.loadParams() # 機能せず => -1
+    for key in params.keys():
+        print(key, params[key])
+        print(key, params.getlist(key))
+        req.setParameter(key, params[key])
+    mapfile = '/srv/tracea/server/wms_ng.map'
+    map = mapscript.mapObj(mapfile)
+    mapscript.msIO_installStdoutToBuffer()
+    map.OWSDispatch(req)
+    content_type = mapscript.msIO_stripStdoutBufferContentType()
+    result = mapscript.msIO_getStdoutBufferBytes()
+
+    # ★ポイント1
+    response = make_response()
+
+    # レスポンスオブジェクトに画像バイナリを設定
+    response.data = result
+
+    # ダウンロード時
+    #downloadFileName = 'report3.png'
+    #response.headers['Content-Disposition'] = 'attachment; filename=' + downloadFileName
+
+    # ファイルタイプ
+    response.mimetype = 'image/png'
+    return response
