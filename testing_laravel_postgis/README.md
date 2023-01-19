@@ -8,8 +8,8 @@ $ sudo apt install vim git unzip -y
 #$ sudo apt install apache2 -y
 $ sudo apt install php -y
 
-# for laravel
-$ sudo apt install php-curl php-xml php-pgsql -y
+# for laravel, php-zipは別件用
+$ sudo apt install php-curl php-xml php-pgsql php-zip -y
 
 $ sudo apt install wget curl gnupg2 software-properties-common apt-transport-https -y
 $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
