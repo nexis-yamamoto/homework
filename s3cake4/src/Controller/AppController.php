@@ -50,4 +50,22 @@ class AppController extends Controller
          */
         //$this->loadComponent('FormProtection');
     }
+
+    function log_r($obj, $title=null) {
+        /*global $debugOut;
+        if (!$debugOut) {
+            return;
+        }*/
+        ob_start();
+        if ($title !== null) {
+            echo "[$title] ";
+        }
+        print_r($obj);
+        $type = gettype($obj);
+        echo "($type)";
+        $buffer = ob_get_contents();
+        ob_end_clean();
+        $this->log($buffer);
+    }
+
 }
