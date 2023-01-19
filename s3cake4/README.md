@@ -15,7 +15,10 @@ $ composer create-project --prefer-dist cakephp/app:4.* s3cake4
 $ cd s3cake4
 $ composer update
 ```
-
+aws sdkを追加
+```
+$ composer require aws/aws-sdk-php
+```
 
 # CakePHP Application Skeleton
 
@@ -67,6 +70,62 @@ Read and edit the environment specific `config/app_local.php` and setup the
 `'Datasources'` and any other configuration relevant for your application.
 Other environment agnostic settings can be changed in `config/app.php`.
 
+app.php
+```
+    'Datasources' => [
+        'default' => [
+            'className' => Connection::class,
+            'driver' => Postgres::class,
+            'persistent' => false,
+            'timezone' => 'UTC',
+            'flags' => [],
+            'cacheMetadata' => true,
+            'log' => false,
+            'quoteIdentifiers' => false,
+        ],
+
+        /*
+         * The test connection is used during the test suite.
+         */
+        'test' => [
+            'className' => Connection::class,
+            'driver' => Postgres::class,
+            'persistent' => false,
+            'timezone' => 'UTC',
+            'flags' => [],
+            'cacheMetadata' => true,
+            'quoteIdentifiers' => false,
+            'log' => false,
+        ],
+    ],
+```
+app_local.php
+```
+    'Datasources' => [
+        'default' => [
+            'host' => 'localhost',
+            'username' => 'postgres',
+            //'password' => 'secret',
+            'database' => 'tracea',
+            'url' => env('DATABASE_URL', null),
+        ],
+        'test' => [
+            'host' => 'localhost',
+            'username' => 'postgres',
+            'database' => 'tracea',
+            'url' => env('DATABASE_TEST_URL', null),
+        ],
+    ],
+
+...
+
+    // never commit
+    'AWS_REGION_CODE' => 'region code',
+    'AWS_BUCKET_NAME' => 'bucket name',
+    'AWS_ACCESS_KEY_ID' => 'key id',
+    'AWS_SECRET_ACCESS_KEY' => 'access key',
+
+```
 ## Layout
 
 The app skeleton uses [Milligram](https://milligram.io/) (v1.3) minimalist CSS
