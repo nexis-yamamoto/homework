@@ -142,6 +142,11 @@ $ sudo chmod -R 755 /opt/redmine/redmine-5.0.1/public/plugin_assets/
 $ sudo chown www-data:www-data redmine-5.0.1/Gemfile.lock
 ```
 
+シンボリックリンク
+```
+sudo ln -s /opt/redmine/redmine-3.4.11/public/ /var/www/html/redmine
+```
+
 $ sudo vi /etc/apache2/sites-enabled/000-default.conf
 ```
 <VirtualHost *:80>
