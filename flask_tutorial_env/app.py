@@ -2,8 +2,12 @@ from flask import Flask
 
 app = Flask(__name__)
 
-from blueprint_sample import ok_module
-app.register_blueprint(ok_module)
+# fromのファイル名に予約語や既存クラス名はつかえない
+from subprocess_sample import command_module
+from blueprint_sample import sample_module
+
+app.register_blueprint(command_module)
+app.register_blueprint(sample_module)
 
 # 最小構成
 @app.route("/") # routeデコーダでrouting
