@@ -2,20 +2,27 @@ from flask import Flask
 
 app = Flask(__name__)
 
+from blueprint_sample import ok_module
+app.register_blueprint(ok_module)
+
 # 最小構成
 @app.route("/") # routeデコーダでrouting
 def index(): # view関数、デフォルトのコンテンツタイプはhtml
     # ヒアドキュメント
     s = '''
 <p>Hello, World!</p>
-<p>hihi</p>'''
+<a href="/list-routes">all routes</p>
+<a href="/me">json</p>
+<a href="/version">psycopg2</p>
+<a href="/leaflet/5154">5154 farmer map</p>
+'''
     return s
 
 
 # エスケープ処理
 from markupsafe import escape
 
-@app.route("/<name>")
+@app.route("/hello/<name>")
 def hello(name):
     return f"Hello, {escape(name)}!"
 
@@ -175,7 +182,7 @@ def psycopg2_geojson():
 
 import json
 
-def geojson(epsg, farmer_code=16511):
+def geojson(epsg, farmer_code=5154):
     dsn = "dbname=tracea host=localhost user=postgres"
     hojos = []
     sql = """select
@@ -212,9 +219,9 @@ where (year=2022 """.format(srs=epsg)
                 hojos.append(feature)
     return hojos
 
-@app.route('/leaflet')
-def leaflet():
-    hojos = geojson(4326)
+@app.route('/leaflet/<int:code>')
+def leaflet(code):
+    hojos = geojson(4326, farmer_code=code)
     #hojos = geojson(3857)
     return render_template('leaflet.html', hojos=hojos) #, json=hojos_json_string)
 
@@ -225,7 +232,7 @@ def openlayers_sample():
 @app.route('/openlayers')
 def openlayers():
     hojos = geojson(3857)
-    return render_template('openlayers.html', hojos=hojos) #, json=hojos_json_string)
+    return render_template('openlayers.html', geojsons=hojos) #, json=hojos_json_string)
 
 @app.route('/map')
 def map():
@@ -296,7 +303,7 @@ def mapscript_test():
         print(key, params[key])
         print(key, params.getlist(key))
         req.setParameter(key, params[key])
-    mapfile = '/srv/tracea/server/wms_ng.map'
+    mapfile = '/srv/tracea/wms_ng.map'
     map = mapscript.mapObj(mapfile)
     mapscript.msIO_installStdoutToBuffer()
     map.OWSDispatch(req)
@@ -316,3 +323,23 @@ def mapscript_test():
     # ファイルタイプ
     response.mimetype = 'image/png'
     return response
+
+
+
+
+# FlaskアプリケーションのルートとURLルールの一覧を取得
+@app.route('/list-routes')
+def list_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        print(type(rule))
+        print(vars(rule))
+        route = {
+            'endpoint': rule.endpoint,
+            'methods': ','.join(rule.methods),
+            'path': rule.rule,
+#            'vars': str(vars(rule))
+        }
+        routes.append(route)
+    
+    return {'routes': routes}

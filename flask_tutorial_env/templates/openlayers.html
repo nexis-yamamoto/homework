@@ -90,7 +90,7 @@ const styleFunction = function (feature) {
   return styles[feature.getGeometry().getType()];
 };
 
-const hojos = {{ hojos | tojson }};  //ここでjsの変数として再定義
+const hojos = {{ geojsons | tojson }};  //ここでjsonに変更しつつ、jsの変数として再定義
 const hojosObject = {
   'type': 'FeatureCollection',
   'crs': {
