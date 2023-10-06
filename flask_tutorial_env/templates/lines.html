@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lines ol8</title>
+        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+        <style>
+.map {
+    width: 100%;
+    height: 400px;
+}
+        </style>
+    </head>
+<body>
+    <div id="map" class="map"></div>
+    <script>
+const image = new ol.style.Circle({
+    radius: 5,
+    fill: null,
+    stroke: new ol.style.Stroke({color: 'red', width: 1}),
+});
+
+const styles = {
+    'Point': new ol.style.Style({
+        image: image,
+    }),
+    'LineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1,
+        }),
+    }),
+    'MultiLineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1,
+        }),
+    }),
+    'MultiPoint': new ol.style.Style({
+        image: image,
+    }),
+    'MultiPolygon': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'yellow',
+            width: 1,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 0, 0.1)',
+        }),
+    }),
+    'Polygon': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'blue',
+            lineDash: [4],
+            width: 3,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 255, 0.1)',
+        }),
+    }),
+    'GeometryCollection': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'magenta',
+            width: 2,
+        }),
+        fill: new ol.style.Fill({
+            color: 'magenta',
+        }),
+        image: new ol.style.Circle({
+            radius: 10,
+            fill: null,
+            stroke: new ol.style.Stroke({
+                color: 'magenta',
+            }),
+        }),
+    }),
+    'Circle': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'red',
+            width: 2,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(255,0,0,0.2)',
+        }),
+    }),
+};
+
+const styleFunction = function (feature) {
+    return styles[feature.getGeometry().getType()];
+};
+
+const hojos = {{ geojsons | tojson }};  //ここでjsonに変更しつつ、jsの変数として再定義
+const hojosObject = {
+    'type': 'FeatureCollection',
+    'crs': {
+        'type': 'name',
+        'properties': {
+        'name': 'EPSG:3857',
+        },
+    },
+    'features': hojos
+}
+console.log(hojosObject);
+
+// ソースに含まれたgeojsonをソースとする
+const vectorSource = new ol.source.Vector({
+//  features: new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(hojosObject),
+    features: new ol.format.GeoJSON().readFeatures(hojosObject),
+});
+// 手動で図形を追加する場合
+// vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+// レイヤ
+const vectorLayer = new ol.layer.Vector({
+    source: vectorSource,
+    style: styleFunction,
+});
+
+// env_js
+// "255 255 0" => "#ffff00"
+function to_webcolor(text_color) {
+    let colors = text_color.split(' ');
+    let webcolor = "#" + colors.map(function(value) {
+        var s = "0" + parseInt(value).toString(16); // 0つけて最大3桁
+        return s.slice(-2); //後ろ2桁を切り出し
+    }).join("");
+    return webcolor;
+}
+
+// urlに指定された場所のgeojsonをソースとする
+const source2 = new ol.source.Vector({
+//    url: '/hojos/16511',
+//    url: '/hojos/79415',
+    url: '/lines_api/0',//全件
+    //projection: 'EPSG:3857',
+    format: new ol.format.GeoJSON(
+        { featureProjection: 'EPSG:3857' }
+    ),
+});
+
+// geojsonのダウンロードが終わってからgetExtent => fitする
+// https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
+source2.once('change', function(e) {
+    console.log('source2 changed' + e);
+    console.log(e);
+    if (source2.getState() === 'ready') {
+        //if (layers[0].getSource().getFeatures().length > 0) {
+        if (e.target.getFeatures().length > 0) {
+            map.getView().fit(source2.getExtent(), map.getSize());
+        }
+    }
+});
+
+//stroke
+//https://openlayers.org/en/latest/apidoc/module-ol_style_Stroke-Stroke.html
+
+const vectorLayer2 = new ol.layer.Vector({
+    //background: '#1a2b39',
+    //source: new ol.source.Vector({
+    //  url: '/hojos',
+    //  projection: 'EPSG:3857',
+    //  format: new ol.format.GeoJSON(),
+    //}),
+    source: source2,
+    style: function (feature) {
+        //console.log('on style function' + feature.get('no'));
+        //console.log(feature);
+        const style = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+            //color	Color | ColorLike | undefined	
+            //lineCap	CanvasLineCap (defaults to 'round')	butt, round, or square.
+            //lineJoin	CanvasLineJoin (defaults to 'round')	bevel, round, or miter.
+            //lineDash	Array.<number> | undefined	
+            //lineDashOffset	number (defaults to 0)	
+            //miterLimit	number (defaults to 10)	
+            //width	number | undefined	
+            lineDash: [4, 8],
+            color: 'magenta',
+            width: 3,
+        }),
+        // 塗り
+        fill: new ol.style.Fill({
+            color: '#ee0000',
+        }),
+        // ラベル
+        text: new ol.style.Text({
+            font: '16px sans-serif',
+            textAlign: 'right',
+            justify: 'left',
+                text: feature.get('name'),// + ':' + feature.get('keycode'),
+                fill: new ol.style.Fill({
+                    color: [255, 255, 255, 1],
+                }),
+                backgroundFill: new ol.style.Fill({
+                    color: [168, 50, 153, 0.6],
+                }),
+                padding: [2, 2, 2, 2],
+                overflow: true // 図形からはみ出るラベルも表示する
+            }),
+        });
+        //const color = to_webcolor(feature.get('color')) || '#ee0000';
+        const color = '#ee0000';
+        style.getFill().setColor(color);
+        return style;
+    },
+});
+
+const map = new ol.Map({
+    layers: [
+        new ol.layer.Tile({
+        source: new ol.source.OSM(),
+        }),
+        //vectorLayer, // ソース内のgeojsonから
+        vectorLayer2, // url指定のgeojsonから
+    ],
+    target: 'map',
+    view: new ol.View({
+    //    projection: 'EPSG:4326', //default=3857
+        projection: 'EPSG:3857', //default
+        center: [0, 0],
+        zoom: 2,
+    }),
+});
+console.log(map);
+
+// ロードが発生しない場合はここでfit可能
+//map.getView().fit(vectorSource.getExtent());
+
+    </script>
+</body>
+</html>
