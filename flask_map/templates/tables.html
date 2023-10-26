@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+<style type="text/css">
+table, th, td {
+  border:1px solid #333;
+}
+</style>
+  <title>{{ title }}</title>
+</head>
+
+<p><a href="/">back</a></p>
+
+<h1>{{ title }}</h1>
+<table>
+  <tr>
+{% for key in tables[0].keys() %}
+    <th>{{ key }}</th>
+{% endfor %}
+  </tr>
+
+{% for row in tables %}
+  <tr>
+  {% for key in tables[0].keys() %}
+    <td>{{ row[key] }}</td>
+  {% endfor %}
+  </tr>
+{% endfor %}
+</table>
+
+

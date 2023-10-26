@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lines ol8</title>
+        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+        <style>
+.map {
+    width: 100%;
+    height: 600px;
+}
+        </style>
+    </head>
+<body onload="fetch_catalog()">
+    <div id="map" class="map"></div>
+    <button id="test" onclick="test()">test</button>
+
+<script>
+
+const image = new ol.style.Circle({
+    radius: 5,
+    fill: null,
+    stroke: new ol.style.Stroke({color: 'red', width: 1}),
+});
+
+const styles = {
+    'Point': new ol.style.Style({
+        image: image
+    }),
+    'LineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1,
+        }),
+    }),
+    'MultiLineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1,
+        }),
+    }),
+    'MultiPoint': new ol.style.Style({
+        image: image,
+    }),
+    'MultiPolygon': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'yellow',
+            width: 1,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 0, 0.1)',
+        }),
+    }),
+    'Polygon': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'blue',
+            lineDash: [4],
+            width: 3,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 255, 0.1)',
+        }),
+    }),
+    'GeometryCollection': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'magenta',
+            width: 2,
+        }),
+        fill: new ol.style.Fill({
+            color: 'magenta',
+        }),
+        image: new ol.style.Circle({
+            radius: 10,
+            fill: null,
+            stroke: new ol.style.Stroke({
+                color: 'magenta',
+            }),
+        }),
+    }),
+    'Circle': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'red',
+            width: 2,
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(255,0,0,0.2)',
+        }),
+    }),
+};
+
+const styleFunction = function (feature) {
+    return styles[feature.getGeometry().getType()];
+};
+const map = new ol.Map({
+    //layers: [
+    //    new ol.layer.Tile({
+    //        source: new ol.source.OSM(),
+    //    }),
+        //vectorLayer, // ソース内のgeojsonから
+    //     vectorLayer2, // url指定のgeojsonから
+    //],
+    target: 'map',
+    view: new ol.View({
+    //    projection: 'EPSG:4326', //default=3857
+        projection: 'EPSG:3857', //default
+        center: [0, 0],
+        zoom: 2,
+    }),
+});
+map.addLayer(new ol.layer.Tile({
+    source: new ol.source.OSM(),
+    id: 'moge'
+}));
+
+const layers = [];
+const SCRIPT_ROOT = {{ request.script_root | tojson }};
+
+const sources = [];
+
+function fetch_catalog() {
+    console.log('body.onload');
+
+    //let user_id = 10;
+    //let user_url = `${SCRIPT_ROOT}/maptables_api/${user_id}`
+    const user_url = `${SCRIPT_ROOT}/maptables_api`;
+    console.log('url = ' + user_url);
+    fetch(user_url).then((response) => {
+        return response.json()
+    }).then((data) => { // .jsonのpromiseをthenで解体
+        console.log('then1 ===== for every layers');
+        console.log(data);
+
+        data.forEach((layer) => {
+            console.log(layer['f_table_name']);
+
+            // urlに指定された場所のgeojsonをソースとする
+            const aSource = new ol.source.Vector({
+                url: '/lines_api/' + layer['f_table_name'],
+                format: new ol.format.GeoJSON(
+                    { featureProjection: 'EPSG:3857' }
+                ),
+            });
+            sources.push(aSource);
+
+            const aVectorLayer = new ol.layer.Vector({
+                id: 'hoge',
+                source: aSource,
+                style: function (feature) {
+                    const layer_name = layer['f_table_name']; //feature.get('layer');
+                    console.log('on style ');
+                    console.log(feature);
+                    console.log(feature.get('名称') + '\n' + layer_name + '\n' + feature.get('keycode'));
+
+                    let color1 = '#ee0000';
+                    let color2 = '#00ee00';
+                    
+                    //switch (layer_name) {
+                    switch (layer['f_table_name']) {
+                        case 'main_line':
+                            color1 = '#ee0000';
+                            color2 = '#0000ee';
+                            break;
+                        case 'sub_line':
+                            color1 = '#ee0000';
+                            color2 = '#00eeee';
+                            break;
+                        case 'branch_line':
+                            color1 = '#00ee00';
+                            color2 = '#ee00ee';
+                            break;
+                        default:
+                            const s = styles['Point'];
+                            s.setText(new ol.style.Text({
+                                font: '16px sans-serif',
+                                textAlign: 'right',
+                                justify: 'left',
+                                text: feature.get('名称') + '\n' + layer_name + '\n' + feature.get('keycode'),
+                                fill: new ol.style.Fill({
+                                    color: [255, 255, 255, 1],
+                                }),
+                                backgroundFill: new ol.style.Fill({
+                                    color: [168, 50, 153, 0.6],
+                                }),
+                                padding: [2, 2, 2, 2],
+                                overflow: true // 図形からはみ出るラベルも表示する
+                            }));
+                            return s;
+                    }
+
+                    const retStyle = [
+                        // スタイル1(ライン下地)
+                        new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                //color	Color | ColorLike | undefined
+                                //lineCap	CanvasLineCap (defaults to 'round')	butt, round, or square.
+                                //lineJoin	CanvasLineJoin (defaults to 'round')	bevel, round, or miter.
+                                //lineDash	Array.<number> | undefined
+                                //lineDashOffset	number (defaults to 0)
+                                //miterLimit	number (defaults to 10)
+                                //width	number | undefined
+                                color: color1, // '#ee0000', //outerColor,
+                                width: 7,
+                            }),
+                            zIndex: 0,
+                            
+                        }),
+                        // スタイル2(ライン上塗)
+                        new ol.style.Style({
+                            stroke: new ol.style.Stroke({ 
+                                color: color2, // '#00ee00', //color,
+                                width: 5,
+                            }),
+                            zIndex: 1,
+                            // ラベル
+                            text: new ol.style.Text({
+                                font: '16px sans-serif',
+                                textAlign: 'right',
+                                justify: 'left',
+                                text: feature.get('名称') + '\n' + layer_name + '\n' + feature.get('keycode'),
+                                fill: new ol.style.Fill({
+                                    color: [255, 255, 255, 1],
+                                }),
+                                backgroundFill: new ol.style.Fill({
+                                    color: [168, 50, 153, 0.6],
+                                }),
+                                padding: [2, 2, 2, 2],
+                                overflow: true // 図形からはみ出るラベルも表示する
+                            }),
+                        })
+                    ];
+                    return retStyle;
+                },
+            });
+            map.addLayer(aVectorLayer);
+
+        });
+
+        // 各vectorSourceの読み込み完了Promiseを作成
+        const loadPromises = sources.map((source) =>
+            new Promise((resolve) => {
+                source.once('change', function () {
+                    console.log('onchange source');
+                    if (source.getState() === 'ready') {
+                        resolve();
+                    }
+                });
+            })
+        );
+        // すべてのPromiseが完了したときに地図を全体にフィット
+        Promise.all(loadPromises).then(() => {
+            console.log('on promise all');
+            const extent = sources.reduce((totalExtent, source) => {
+                return ol.extent.extend(totalExtent, source.getExtent());
+            }, ol.extent.createEmpty());
+
+            map.getView().fit(extent, {
+                padding: [10, 10, 10, 10],
+            });
+        });
+
+
+    });
+    fetch(user_url).then((response) => {
+        const data = response.json() // Body.json()はPromiseを返す
+        console.log('then2');
+        console.log(data); // => Promise
+    });
+}
+
+
+
+
+
+
+
+/*const hojos = {{ geojsons | tojson }};  //ここでjsonに変更しつつ、jsの変数として再定義
+const hojosObject = {
+    'type': 'FeatureCollection',
+    'crs': {
+        'type': 'name',
+        'properties': {
+        'name': 'EPSG:3857',
+        },
+    },
+    'features': hojos
+}
+console.log(hojosObject);*/
+
+/*
+// ソースに含まれたgeojsonをソースとする
+const vectorSource = new ol.source.Vector({
+//  features: new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(hojosObject),
+    features: new ol.format.GeoJSON().readFeatures(hojosObject),
+});*/
+// 手動で図形を追加する場合
+// vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+// レイヤ
+/*const vectorLayer = new ol.layer.Vector({
+    source: vectorSource,
+    style: styleFunction,
+});*/
+
+// env_js
+// "255 255 0" => "#ffff00"
+function to_webcolor(text_color) {
+    let colors = text_color.split(' ');
+    let webcolor = "#" + colors.map(function(value) {
+        var s = "0" + parseInt(value).toString(16); // 0つけて最大3桁
+        return s.slice(-2); //後ろ2桁を切り出し
+    }).join("");
+    return webcolor;
+}
+
+// urlに指定された場所のgeojsonをソースとする
+/*
+const source2 = new ol.source.Vector({
+//    url: '/hojos/16511',
+    //url: '/lines_api/0',//全件
+    url: '/united_lines_api/0',//全件
+    //projection: 'EPSG:3857',
+    format: new ol.format.GeoJSON(
+        { featureProjection: 'EPSG:3857' }
+    ),
+});*/
+
+// geojsonのダウンロードが終わってからgetExtent => fitする
+// https://stackoverflow.com/questions/32585318/how-to-get-the-extent-of-a-geojson-vector-source
+/*source2.once('change', function(e) {
+    console.log('source2 changed' + e);
+    console.log(e);
+    if (source2.getState() === 'ready') {
+        //if (layers[0].getSource().getFeatures().length > 0) {
+        if (e.target.getFeatures().length > 0) {
+            map.getView().fit(source2.getExtent(), map.getSize());
+        }
+    }
+});*/
+
+//stroke
+//https://openlayers.org/en/latest/apidoc/module-ol_style_Stroke-Stroke.html
+
+/*
+const vectorLayer2 = new ol.layer.Vector({
+    //background: '#1a2b39',
+    //source: new ol.source.Vector({
+    //  url: '/hojos',
+    //  projection: 'EPSG:3857',
+    //  format: new ol.format.GeoJSON(),
+    //}),
+    id: 'hoge',
+    source: source2,
+    style: function (feature) {
+        const layer_name = feature.get('layer');
+        let color1 = '#ee0000';
+        let color2 = '#00ee00';
+        switch (layer_name) {
+            case 'main_line':
+                color1 = '#ee0000';
+                color2 = '#0000ee';
+                break;
+            case 'sub_line':
+                color1 = '#ee0000';
+                color2 = '#00eeee';
+                break;
+            case 'branch_line':
+                color1 = '#00ee00';
+                color2 = '#ee00ee';
+                break;
+            default:
+                const s = styles['Point'];
+                s.setText(new ol.style.Text({
+                    font: '16px sans-serif',
+                    textAlign: 'right',
+                    justify: 'left',
+                    text: feature.get('name') + '\n' + layer_name,
+                    fill: new ol.style.Fill({
+                        color: [255, 255, 255, 1],
+                    }),
+                    backgroundFill: new ol.style.Fill({
+                        color: [168, 50, 153, 0.6],
+                    }),
+                    padding: [2, 2, 2, 2],
+                    overflow: true // 図形からはみ出るラベルも表示する
+                }));
+                return s;
+        }
+
+        const retStyle = [
+            // スタイル1(ライン下地)
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    //color	Color | ColorLike | undefined
+                    //lineCap	CanvasLineCap (defaults to 'round')	butt, round, or square.
+                    //lineJoin	CanvasLineJoin (defaults to 'round')	bevel, round, or miter.
+                    //lineDash	Array.<number> | undefined
+                    //lineDashOffset	number (defaults to 0)
+                    //miterLimit	number (defaults to 10)
+                    //width	number | undefined
+                    color: color1, // '#ee0000', //outerColor,
+                    width: 7,
+                }),
+                zIndex: 0,
+                
+            }),
+            // スタイル2(ライン上塗)
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({ 
+                    color: color2, // '#00ee00', //color,
+                    width: 5,
+                }),
+                zIndex: 1,
+                // ラベル
+                text: new ol.style.Text({
+                    font: '16px sans-serif',
+                    textAlign: 'right',
+                    justify: 'left',
+                    text: feature.get('name') + '\n' + feature.get('layer'),
+                    fill: new ol.style.Fill({
+                        color: [255, 255, 255, 1],
+                    }),
+                    backgroundFill: new ol.style.Fill({
+                        color: [168, 50, 153, 0.6],
+                    }),
+                    padding: [2, 2, 2, 2],
+                    overflow: true // 図形からはみ出るラベルも表示する
+                }),
+            })
+        ];
+        //const color = to_webcolor(feature.get('color')) || '#ee0000';
+        //style[1].getFill().setColor(color);
+        return retStyle;
+    },
+});*/
+
+
+/*
+    レイヤの追加
+    layersはcollection
+*/
+// setではレイヤ追加できなかった
+//map.getLayers().set('tiles', new ol.layer.Tile({
+/*map.addLayer(new ol.layer.Tile({
+    source: new ol.source.OSM(),
+    id: 'moge'
+}));*/
+//map.addLayer(vectorLayer2);
+
+/* レイヤのイテレーション */
+map.getLayers().forEach(function (layer) {
+    if (layer.get('id') === 'moge') {
+        console.log('hit');
+    } else if (layer.get('id') === 'hoge') {
+        console.log('hit2');
+    } else {
+        console.log('no');
+    }
+});
+
+// ロードが発生しない場合はここでfit可能
+//map.getView().fit(vectorSource.getExtent());
+
+
+// オブジェクトのプロトタイプに新しい関数を追加
+// idでレイヤを検索返却する関数をmapについか
+map.getLayerById = function(id) {
+    let foundLayer = null;
+    this.getLayers().forEach(function (layer) {
+        console.log(layer.get('id'));
+        if (layer.get('id') === id) {
+            foundLayer = layer;
+        }
+    });
+    return foundLayer;
+};
+
+
+test = function() {
+    console.log('on test');
+    console.log(map.getLayerById('hoge'));
+    const layer = map.getLayerById('moge');
+    layer.setVisible(false);
+}
+
+    </script>
+</body>
+</html>
