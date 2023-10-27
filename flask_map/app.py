@@ -18,6 +18,7 @@ def index(): # view関数、デフォルトのコンテンツタイプはhtml
     """
     s = '''
 <p>Index</p>
+<a href="/map">map</p>
 <a href="/list-routes">all routes</p>
 <a href="/pgtables">tables</p>
 <a href="/maptables">maptables</p>
