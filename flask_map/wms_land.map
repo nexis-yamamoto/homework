@@ -1,0 +1,144 @@
+# mapfile for flask_map land
+MAP
+
+CONFIG "MS_ERRORFILE" "ms_error.log"
+CONFIG "PROJ_LIB" "/usr/share/proj/" #proj.db mapserver8でdeprecated
+CONFIG "PROJ_DATA" "/usr/share/proj/" #proj.db
+
+DEBUG 5
+
+UNITS meters
+
+# meters for 3857=900913
+# EXTENTを求めるクエリ SELECT ST_Extent(geom) as bextent FROM sometable;
+# main BOX(15765077.907600824 5372077.006491233,15792179.02323181 5403355.272971086)
+# land BOX(15777719.311802076 5369910.282863224,15792360.800345907 5386370.951864271)
+#          15760000           5368000           15800000          5410000
+#EXTENT 15450000 4950000 16300000 5750000 # hokuryu
+#EXTENT 15826000 5430000 15840000 5470000 # horokanai
+EXTENT 15760000 5368000 15800000 5410000 # linetest
+PROJECTION
+ "init=epsg:3857"
+END
+
+SIZE 600 500
+SHAPEPATH "/srv/tracea/mapdata"
+#SYMBOLSET "/srv/dgis/map/config/common/symbols/symbols-pmapper.sym"
+FONTSET "/srv/tracea/fonts/msfontset.txt"
+RESOLUTION 96
+#IMAGETYPE png
+IMAGETYPE jpeg
+#INTERLACE OFF
+
+
+#
+# Image formates for GD
+#
+OUTPUTFORMAT
+  NAME "png"
+  DRIVER "AGG/PNG"
+  MIMETYPE "image/png"
+  IMAGEMODE RGB
+  FORMATOPTION  INTERLACE=OFF
+  TRANSPARENT OFF
+  EXTENSION "png"
+END
+
+OUTPUTFORMAT
+  NAME "jpeg"
+  DRIVER "AGG/JPEG"
+  MIMETYPE "image/jpeg"
+  IMAGEMODE RGB
+  FORMATOPTION "QUALITY=70"
+  EXTENSION "jpg"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  TEMPLATE "map.html"
+  IMAGEPATH "/srv/jas/ms_tmp/"
+  IMAGEURL "/img/"
+  METADATA
+    "wms_title" "wms test server"
+    "ows_enable_request"   "*"
+    "wms_srs" "EPSG:3857"
+    "tile_map_edge_buffer" "16"
+  END  # Metadata
+END  # Web
+
+
+#
+#
+#
+#LAYER
+#  NAME "air"
+#  TYPE raster
+#  STATUS DEFAULT
+#  TILEINDEX "retiled.shp"
+#  TILEITEM "location"
+#  TEMPLATE void
+#  PROJECTION
+#    "init=epsg:3857"
+#  END
+#END
+
+#
+#
+#
+LAYER
+  NAME "land"
+  TYPE polygon
+  STATUS DEFAULT
+  CONNECTIONTYPE postgis
+  CONNECTION "host=localhost dbname=map user=postgres port=5432"
+  DATA "wkb_geometry from (select p.ogc_fid,p.wkb_geometry from r2023.land p) as new_table using unique ogc_fid"
+  TEMPLATE void
+  PROJECTION
+    "init=epsg:2454"
+  END
+  CLASS
+    STYLE
+      WIDTH 0.5
+      COLOR 255 255 255
+      OUTLINECOLOR 0 0 0
+    END
+  END
+END
+
+#LAYER
+#  NAME "streets"
+#  TYPE polygon
+#  STATUS DEFAULT
+#  CONNECTIONTYPE postgis
+#  CONNECTION "host=localhost dbname=jasdb user=jas password=YvH11msq port=5432"
+#  DATA "wkb_geometry from streets using unique code"
+#  TEMPLATE void
+#  PROJECTION
+#    "init=epsg:2454"
+#  END
+#  LABELITEM "name"
+#  CLASS
+#    STYLE
+#      OUTLINECOLOR 255 255 0
+#    END
+##    LABEL
+##      COLOR 255 255 0
+##      TYPE truetype
+##      ANTIALIAS TRUE
+##      FORCE true
+##      POSITION cc
+##      BUFFER 4
+##      ENCODING "utf-8"
+##      FONT ipag
+##      SIZE 14
+##      MAXSIZE 15
+##    END #Label
+#  END
+#
+#END
+
+
+
+END  #Map

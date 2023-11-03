@@ -112,10 +112,25 @@ const map = new ol.Map({
 });
 
 // OpenStreetMapレイヤの追加
+/*
 map.addLayer(new ol.layer.Tile({
     source: new ol.source.OSM(),
     id: 'osm'
-}));
+}));*/
+
+
+// mapserver wmsレイヤの追加
+const wms = new ol.layer.Tile({
+    //extent: [-13884991, 2870341, -7455066, 6338219],
+    source: new ol.source.TileWMS({
+        url: '/mapscript/',
+        params: {'LAYERS': 'land', 'TILED': true},
+        //serverType: 'mapserver',//mapserver, geoserver, carmentaserver, qgis
+        // Countries have transparency, so do not fade tiles:
+        transition: 0,
+    }),
+});
+map.addLayer(wms);
 
 const layers = [];
 
@@ -235,7 +250,6 @@ function fetch_layers() {
                     let color1 = '#ee0000';
                     let color2 = '#00ee00';
                     
-                    //switch (layer_name) {
                     switch (layer_name) {
                         case 'main_line':
                             color1 = '#ee0000';
@@ -248,6 +262,10 @@ function fetch_layers() {
                         case 'branch_line':
                             color1 = '#00ee00';
                             color2 = '#ee00ee';
+                            break;
+                        case 'sub_out':
+                            color1 = '#ee0000';
+                            color2 = '#ee0000';
                             break;
                         default:
                             const s = styles['Point'];

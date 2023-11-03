@@ -19,10 +19,11 @@ def index(): # view関数、デフォルトのコンテンツタイプはhtml
     s = '''
 <p>Index</p>
 <a href="/map">map</p>
+<a href="/lines">line map</p>
+<a href="/mapscript">lands</p>
 <a href="/list-routes">all routes</p>
 <a href="/pgtables">tables</p>
 <a href="/maptables">maptables</p>
-<a href="/lines">line map</p>
 <a href="/me">json</p>
 <a href="/version">psycopg2</p>
 '''
@@ -283,7 +284,7 @@ def get_params():
 import mapscript
 from flask import make_response
 
-# http://192.168.253.54:5000/mapscript/?service=WMS&request=GetMap&layers=air&styles=&format=image%2Fpng&transparent=true&version=1.1.1&scheme=wms&continuousWorld=true&width=256&height=256&srs=EPSG%3A3857&bbox=15859766.124834653,5423971.527116109,15860377.621060936,5424583.023342389
+# http://192.168.253.54:5000/mapscript/?service=WMS&request=GetMap&layers=land&styles=&format=image%2Fpng&transparent=true&version=1.1.1&scheme=wms&continuousWorld=true&width=256&height=256&srs=EPSG%3A3857&bbox=15859766.124834653,5423971.527116109,15860377.621060936,5424583.023342389
 """
 service ['WMS']
 request ['GetMap']
@@ -310,7 +311,7 @@ def mapscript_test():
         print(key, params[key])
         print(key, params.getlist(key))
         req.setParameter(key, params[key])
-    mapfile = '/srv/tracea/wms_ng.map'
+    mapfile = 'wms_land.map'
     map = mapscript.mapObj(mapfile)
     mapscript.msIO_installStdoutToBuffer()
     map.OWSDispatch(req)
