@@ -10,15 +10,67 @@
     width: 100%;
     height: 600px;
 }
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+.ol-popup-closer:after {
+    content: "✖";
+}
         </style>
     </head>
 <body onload="fetch_layers()">
     <div id="map" class="map"></div>
+    <div style="display: none;">
+        <!-- Clickable label for Vienna -->
+        <a class="overlay" id="vienna" target="_blank" href="https://en.wikipedia.org/wiki/Vienna">Vienna</a>
+        <div id="marker" title="Marker"></div>
+        <!-- Popup -->
+        <div id="popup" class="ol-popup">
+            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+            <div id="popup-content"></div>
+        </div>
+    </div>
     <button id="test" onclick="test()">test</button>
     <h3>layers</h3>
     <div id="layers" class="layers"></div>
 
 <script>
+const closer = document.getElementById('popup-closer');
 
 const image = new ol.style.Circle({
     radius: 5,
@@ -94,6 +146,53 @@ const styles = {
 const styleFunction = function (feature) {
     return styles[feature.getGeometry().getType()];
 };
+
+
+// 各種選択方法
+// select interaction working on "singleclick"
+const selectSingleClick = new ol.interaction.Select({
+    style: ol.interaction.selectStyle
+});
+// select interaction working on "click"
+const selectClick = new ol.interaction.Select({
+    condition: ol.events.condition.click,
+    style: ol.interaction.selectStyle,
+});
+// select interaction working on "pointermove"
+const selectPointerMove = new ol.interaction.Select({
+    condition: ol.events.condition.pointerMove,
+    style: ol.interaction.selectStyle,
+});
+// Alt + click
+const selectAltClick = new ol.interaction.Select({
+    style: ol.interaction.selectStyle,
+    condition: function (mapBrowserEvent) {
+        return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
+    },
+});
+
+/**
+ * Create an overlay to anchor the popup to the map.
+ */
+const overlay = new ol.Overlay({
+    element: document.getElementById('popup'),
+    autoPan: {
+        animation: {
+            duration: 250,
+        },
+    },
+});
+/**
+ * Add a click handler to hide the popup.
+ * @return {boolean} Don't follow the href.
+ */
+closer.onclick = function () {
+    overlay.setPosition(undefined);
+    closer.blur();
+    return false;
+};
+
+
 const map = new ol.Map({
     //layers: [
     //    new ol.layer.Tile({
@@ -103,12 +202,50 @@ const map = new ol.Map({
     //     vectorLayer2, // url指定のgeojsonから
     //],
     target: 'map',
+    overlays: [overlay],
     view: new ol.View({
     //    projection: 'EPSG:4326', //default=3857
         projection: 'EPSG:3857', //default
         center: [0, 0],
         zoom: 2,
     }),
+});
+
+let select = selectSingleClick;
+map.addInteraction(select);
+select.on('select', function (e) {
+    console.log(e);
+    // e.targetはSelectオブジェクトか？
+    
+    console.log(e.target.getFeatures().getLength() +
+        ' selected features (last operation selected ' +
+        e.selected.length +
+        ' and deselected ' +
+        e.deselected.length +
+        ' features)');
+    if (e.selected.length < 1) return;
+    // feature -> values string
+    const features = e.target.getFeatures(); //Collection<Feature>
+    const feature = features.item(0); // Feature
+    console.log(feature);
+    console.log(feature.getKeys());
+    let content = "<h3>[情報]</h3>\n";
+    feature.getKeys().forEach((k) => {
+        if (k === 'geometry') { return }
+        if (k === 'wkb_geometry') { return }
+        console.log(feature.get(k));
+        content += '' + k + '=' + feature.get(k) + "<br/>\n";
+    });
+    console.log(content);
+    const popup_content = document.getElementById('popup-content');
+    console.log(popup_content);
+    popup_content.innerHTML = content;
+    //const coordinate = feature.getGeometry().getCoordinates();
+    const geometry = feature.getGeometry();
+    // extentの中央なのでLine上にないことも多い
+    coordinate = ol.extent.getCenter(geometry.getExtent());
+    console.log(coordinate);
+    overlay.setPosition(coordinate);
 });
 
 // OpenStreetMapレイヤの追加
@@ -178,7 +315,7 @@ function updateLayersControl() {
         input2.type = 'checkbox';
         //}
         input2.id = layer['f_table_name'];// checkboxId;
-        input2.checked = true; //lyr.get('visible');
+        input2.checked = false; //true; //lyr.get('visible');
         //input.indeterminate = lyr.get('indeterminate');
         input2.onchange = function (e) {
             const target = e.target;
@@ -216,8 +353,8 @@ function fetch_layers() {
 
         // globalなlayers配列をセットアップ
         data.forEach((layer) => {
-            layer['label_visible'] = true;
-            //layer['label_visible'] = false;
+            //layer['label_visible'] = true;
+            layer['label_visible'] = false;
             layers.push(layer);
         });
 
